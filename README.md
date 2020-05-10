@@ -16,7 +16,7 @@ See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more 
 
 ##  Features
 ### Implemented
-- create new sdk with pyroject.toml
+- add a interpreter with pyproject.toml
 - update and lock with a popup
 
 ## TODO 
