@@ -17,7 +17,7 @@ See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more 
 - update and lock with a popup
 
 ## TODO 
-- publish this plugin on Jetbrains' plugin market 
+- publish this plugin on JetBrains' plugin market 
 - CI/CD
 - unittest
 - document
