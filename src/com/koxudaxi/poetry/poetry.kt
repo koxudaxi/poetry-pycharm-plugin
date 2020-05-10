@@ -178,8 +178,9 @@ fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPa
 
 
 val sdkCache = mutableMapOf<String, Boolean>()
-fun isPoetry(projectPath: @SystemDependent String, pythonPath: String): @SystemDependent Boolean {
-    return sdkCache.getOrElse(projectPath + pythonPath) {
+fun isPoetry(projectPath: @SystemDependent String?, pythonPath: String?): @SystemDependent Boolean {
+    if (projectPath == null || pythonPath == null) return false
+    return sdkCache.getOrElse("$projectPath POETRY_PLUGIN $pythonPath") {
         try {
             runPoetry(projectPath, "env", "use", pythonPath)
             true
@@ -275,7 +276,7 @@ class UsePoetryQuickFix(sdk: Sdk?, module: Module) : LocalQuickFix {
             val existingSdks = sdksModel.sdks.filter { it.sdkType is PythonSdkType }
             // XXX: Should we show an error message on exceptions and on null?
             val newSdk = setupPoetrySdkUnderProgress(project, module, existingSdks, null, null, false) ?: return
-            val existingSdk = existingSdks.find { it.isPoetry && it.homePath == newSdk.homePath }
+            val existingSdk = existingSdks.find { isPoetry(project.basePath, it.homePath) && it.homePath == newSdk.homePath }
             val sdk = existingSdk ?: newSdk
             if (sdk == newSdk) {
                 SdkConfigurationUtil.addSdk(newSdk)
@@ -307,7 +308,7 @@ class PoetryInstallQuickFix : LocalQuickFix {
     companion object {
         fun poetryInstall(project: Project, module: Module) {
             val sdk = module.pythonSdk ?: return
-            if (!sdk.isPoetry) return
+            if (!isPoetry(project.basePath, sdk.homePath)) return
             val listener = PyPackageRequirementsInspection.RunningPackagingTasksListener(module)
             val ui = PyPackageManagerUI(project, sdk, listener)
             ui.install(null, listOf())

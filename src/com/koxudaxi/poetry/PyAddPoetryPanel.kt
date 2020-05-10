@@ -56,7 +56,8 @@ class PyAddPoetryPanel(private val project: Project?,
 
     init {
         addInterpretersAsync(baseSdkField) {
-            detectSystemWideSdks(module, existingSdks, context)
+            findBaseSdks(existingSdks, module, context).takeIf { it.isNotEmpty() }
+                    ?: detectSystemWideSdks(module, existingSdks, context)
         }
     }
 
@@ -102,7 +103,7 @@ class PyAddPoetryPanel(private val project: Project?,
         val builder = FormBuilder.createFormBuilder().apply {
             if (module == null && modules.size > 1) {
                 val associatedObject = if (PlatformUtils.isPyCharm()) "project" else "module"
-                addLabeledComponent("Associated $moduleField", moduleField)
+                addLabeledComponent("Associated $associatedObject", moduleField)
             }
             addLabeledComponent(PyBundle.message("base.interpreter"), baseSdkField)
             addComponent(installPackagesCheckBox)
@@ -167,7 +168,7 @@ class PyAddPoetryPanel(private val project: Project?,
     private fun validatePoetryIsNotAdded(): ValidationInfo? {
         val path = projectPath ?: return null
         val addedPoetry = existingSdks.find {
-            it.associatedModulePath == path && it.isPoetry
+            it.associatedModulePath == path && isPoetry(project?.basePath, sdk?.homePath)
         } ?: return null
         return ValidationInfo("Poetery interpreter has been already added, select '${addedPoetry.name}'")
     }
