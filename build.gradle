@@ -1,0 +1,85 @@
+buildscript {
+    ext.kotlin_version = "1.3.71"
+    ext.python_core_version = "201.6668.115"
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version", "org.apache.tuweni:tuweni-toml:0.10.0"
+
+    }
+}
+
+
+plugins {
+    id "org.jetbrains.intellij" version "0.4.18"
+    id "java"
+    id "idea"
+}
+
+intellij {
+    pluginName project.name
+    version "2020.1"
+    type "IC"
+    updateSinceUntilBuild false
+    downloadSources true
+    plugins "java", "Kotlin", "PythonCore:$python_core_version"
+
+}
+
+allprojects {
+    apply plugin: "org.jetbrains.intellij"
+    apply plugin: "java"
+    apply plugin: "kotlin"
+    apply plugin: "jacoco"
+    repositories {
+        mavenCentral()
+    }
+
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            languageVersion = "1.3"
+            apiVersion = "1.3"
+        }
+    }
+
+    compileTestKotlin {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            languageVersion = "1.3"
+            apiVersion = "1.3"
+        }
+    }
+
+    dependencies {
+        compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+        compile "org.apache.tuweni:tuweni-toml:0.10.0"
+        testCompile group: 'junit', name: 'junit', version: '4.11'
+        compile group: 'org.jetbrains', name: 'annotations', version: '19.0.0'
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+            html.enabled true
+        }
+    }
+
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+
+}
+
+sourceSets {
+    main {
+        java.srcDir 'src'
+        resources.srcDir 'resources'
+    }
+    test {
+        java.srcDir 'testSrc'
+        resources.srcDir 'testData'
+    }
+}

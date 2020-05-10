@@ -1,0 +1,25 @@
+<idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
+    <id>com.koxudaxi.poetry</id>
+    <name>Poetry</name>
+    <version>0.0.0</version>
+    <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
+    <change-notes><![CDATA[]]></change-notes>
+    <description><![CDATA[]]></description>
+
+    <idea-version since-build="201.6668.115"/>
+
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.python</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
+    <projectListeners>
+    </projectListeners>
+    <extensions defaultExtensionNs="Pythonid">
+        <pyAddSdkProvider implementation="com.koxudaxi.poetry.PyAddPoetrySdkProvider"/>
+        <pythonFlavorProvider implementation="com.koxudaxi.poetry.PyPoetrySdkFlavorProvider"/>
+    </extensions>
+
+    <resource-bundle/>
+</idea-plugin>
+
