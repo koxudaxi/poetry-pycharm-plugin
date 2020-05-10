@@ -11,7 +11,21 @@
         <li>Support poetry [#2] </li>
     </ul>
     ]]></change-notes>
-    <description><![CDATA[]]></description>
+    <description><![CDATA[
+    <p>This plugin supports poetry<a href="https://python-poetry.org">poetry</a> which is a package manager for Python</p>
+    <h2>Help</h2>
+    <p>See <a href="https://koxudaxi.github.io/poetry-pycharm-plugin/">documentation</a> for more details.</p>
+    <h2>Features</h2>
+    <h3>Implemented</h3>
+    <li>create new sdk with pyroject.toml</li>
+    <li>update and lock with a popup</li>
+
+    <h3>TODO</h3>
+    <li>publish this plugin on Jetbrains' plugin market</li>
+    <li>CI/CD</li>
+    <li>unittest</li>
+    <li>document</li>
+    ]]></description>
 
     <idea-version since-build="201.6668.115"/>
 
