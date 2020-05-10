@@ -41,10 +41,10 @@ jobs:
         python scripts/build_changelog.py
         mkdocs build --verbose --clean --strict
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./build/reports/jacoco/test/jacocoTestReport.xml 
-        flags: unittests
-        fail_ci_if_error: true
+#    - name: Upload coverage to Codecov
+#      uses: codecov/codecov-action@v1
+#      with:
+#        token: ${{ secrets.CODECOV_TOKEN }}
+#        file: ./build/reports/jacoco/test/jacocoTestReport.xml 
+#        flags: unittests
+#        fail_ci_if_error: true
