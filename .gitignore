@@ -37,7 +37,7 @@ hs_err_pid*
 /jps-plugin/build/
 .gradle
 /out/
-/pydantic-pycahrm-plugin/out/
+/poetry-pycahrm-plugin/out/
 /venv/
 /site
 /docs/changelog.md
