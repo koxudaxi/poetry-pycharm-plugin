@@ -1,8 +1,5 @@
 # Poetry PyCharm Plugin
-[![Build Status](https://travis-ci.org/koxudaxi/poetry-pycharm-plugin.svg?branch=master)](https://travis-ci.org/koxudaxi/pydantic-pycharm-plugin)
-
-
-
+![CI](https://github.com/koxudaxi/poetry-pycharm-plugin/workflows/CI/badge.svg)
 [![codecov](https://codecov.io/gh/koxudaxi/poetry-pycharm-plugin/branch/master/graph/badge.svg)](https://codecov.io/gh/koxudaxi/poetry-pycharm-plugin)
 ![license](https://img.shields.io/github/license/koxudaxi/poetry-pycharm-plugin.svg)
 
