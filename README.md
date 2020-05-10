@@ -20,7 +20,6 @@
 - update and lock with a popup
 
 ## TODO 
-- watch pyproject.toml to update package
 - publish this plugin on Jetbrains' plugin market 
 - CI/CD
 - unittest
