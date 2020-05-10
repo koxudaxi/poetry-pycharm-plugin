@@ -8,8 +8,10 @@
 
 [A JetBrains PyCharm plugin]() for [`poetry`](https://python-poetry.org/).
 
+## This project is currently in an experimental phase
+
 ## Help
-See [documentation](https://koxudaxi.github.io/pydantic-pycharm-plugin/) for more details.
+~~See [documentation](https://koxudaxi.github.io/pydantic-pycharm-plugin/) for more details.~~
 
 
 ##  Features
@@ -23,4 +25,3 @@ We are waiting for your contributions to `poetry-pycharm-plugin`.
 
 ## Links
 
-## This project is currently in an experimental phase
