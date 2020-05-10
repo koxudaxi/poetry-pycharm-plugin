@@ -18,6 +18,12 @@
 ### Implemented
 - create new sdk with pyroject.toml
 
+## TODO 
+- watch pyproject.toml to update package
+- publish this plugin on Jetbrains' plugin market 
+- CI/CD
+- unittest
+- document
 ## Example
 
 ![new_sdk](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/new_sdk.png)
