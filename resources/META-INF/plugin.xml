@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.0.2</2>
+    <p>Features</p>
+    <ul>
+        <li>add quick fix [#9] </li>
+    <ul>
     <h2>version 0.0.1</h2>
     <p>Features</p>
     <ul>
@@ -19,7 +24,7 @@
     <h3>Implemented</h3>
     <li>add a interpreter with pyproject.toml</li>
     <li>update and lock with a popup</li>
-
+    <li>show a message and a link to fix settings (QuickFix)</li>
     <h3>TODO</h3>
     <li>publish this plugin on JetBrains' plugin market</li>
     <li>CI/CD</li>
@@ -33,7 +38,11 @@
     <depends>com.intellij.modules.python</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-                <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>
+        <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>
+        <projectService serviceImplementation="com.koxudaxi.poetry.PoetryConfigService"/>
+        <localInspection language="Python" shortName="PoetryInterpreterInspection" suppressId="PoetryInterpreter" bundle="messages.PyPsiBundle" displayName="Invalid Poetry interpreter configured" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryInterpreterInspection"/>
+        <localInspection language="Python" shortName="PoetryPackageRequirementsInspection" suppressId="PoetryPackageRequirements" bundle="messages.PyPsiBundle" displayName="Poetry Package requirements" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryPackageRequirementsInspection"/>
+
     </extensions>
     <projectListeners>
     </projectListeners>

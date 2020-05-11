@@ -28,6 +28,7 @@ import java.awt.Dimension
 import java.awt.event.ItemEvent
 import java.io.File
 import java.nio.file.Files
+import javax.swing.Icon
 import javax.swing.JComboBox
 import javax.swing.event.DocumentEvent
 
@@ -48,7 +49,7 @@ class PyAddPoetryPanel(private val project: Project?,
                        context: UserDataHolder) : PyAddNewEnvPanel() {
     override val envName = "Poetry"
     override val panelName: String get() = "Poetry Environment"
-//  override val icon: Icon = POETRY_ICON
+    override val icon: Icon = POETRY_ICON
 
     private val moduleField: JComboBox<Module>
 
@@ -168,7 +169,7 @@ class PyAddPoetryPanel(private val project: Project?,
     private fun validatePoetryIsNotAdded(): ValidationInfo? {
         val path = projectPath ?: return null
         val addedPoetry = existingSdks.find {
-            it.associatedModulePath == path && isPoetry(project?.basePath, sdk?.homePath)
+            it.associatedModulePath == path && project?.let { project -> isPoetry(project) } == true
         } ?: return null
         return ValidationInfo("Poetery interpreter has been already added, select '${addedPoetry.name}'")
     }
