@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.0.2</2>
+    <p>Features</p>
+    <ul>
+        <li>add quick fix [#9] </li>
+    <ul>
     <h2>version 0.0.1</h2>
     <p>Features</p>
     <ul>
@@ -19,7 +24,7 @@
     <h3>Implemented</h3>
     <li>add a interpreter with pyproject.toml</li>
     <li>update and lock with a popup</li>
-
+    <li>show a message and a link to fix settings (QuickFix)</li>
     <h3>TODO</h3>
     <li>publish this plugin on JetBrains' plugin market</li>
     <li>CI/CD</li>

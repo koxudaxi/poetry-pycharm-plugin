@@ -15,18 +15,20 @@ See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more 
 ### Implemented
 - add a interpreter with pyproject.toml
 - update and lock with a popup
+- show a message and a link to fix settings (QuickFix)
 
 ## TODO 
 - publish this plugin on JetBrains' plugin market 
 - CI/CD
 - unittest
 - document
-## Example
+## Screen Shots
 
 ![new_sdk](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/new_sdk.png)
 ![installed_package](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/installed_package.png)
 ![run_config](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/run_config.png)
 ![update_lock](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/update_lock.png)
+![quick_fix](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/quick_fix.png)
 
 
 ## Contribute
