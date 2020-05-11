@@ -22,6 +22,12 @@ See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more 
 - CI/CD
 - unittest
 - document
+
+### Complied binary
+The releases section of this repository contains a compiled version of the plugin: [poetry-pycharm-plugin.zip(latest)](https://github.com/koxudaxi/poetry-pycharm-plugin/releases/latest/download/poetry-pycharm-plugin.zip)
+
+After downloading this file, you can install the plugin from disk by following [the JetBrains instructions here](https://www.jetbrains.com/help/pycharm/plugins-settings.html).
+
 ## Example
 
 ![new_sdk](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/new_sdk.png)
