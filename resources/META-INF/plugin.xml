@@ -33,7 +33,11 @@
     <depends>com.intellij.modules.python</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-                <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>
+        <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>
+        <projectService serviceImplementation="com.koxudaxi.poetry.PoetryConfigService"/>
+        <localInspection language="Python" shortName="PoetryInterpreterInspection" suppressId="PoetryInterpreter" bundle="messages.PyPsiBundle" displayName="Invalid Poetry interpreter configured" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryInterpreterInspection"/>
+        <localInspection language="Python" shortName="PoetryPackageRequirementsInspection" suppressId="PoetryPackageRequirements" bundle="messages.PyPsiBundle" displayName="Poetry Package requirements" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryPackageRequirementsInspection"/>
+
     </extensions>
     <projectListeners>
     </projectListeners>

@@ -78,25 +78,25 @@ val Module.pyProjectToml: VirtualFile?
 /**
  * Tells if the SDK was added as a poetry.
  */
-var Sdk.isPoetry: Boolean
-    get() = sdkAdditionalData is PyPoetrySdkAdditionalData
-    set(value) {
-        val oldData = sdkAdditionalData
-        val newData = if (value) {
-            when (oldData) {
-                is PythonSdkAdditionalData -> PyPoetrySdkAdditionalData(oldData)
-                else -> PyPoetrySdkAdditionalData()
-            }
-        } else {
-            when (oldData) {
-                is PyPoetrySdkAdditionalData -> PythonSdkAdditionalData(PythonSdkFlavor.getFlavor(this))
-                else -> oldData
-            }
-        }
-        val modificator = sdkModificator
-        modificator.sdkAdditionalData = newData
-        ApplicationManager.getApplication().runWriteAction { modificator.commitChanges() }
-    }
+//var Sdk.isPoetry: Boolean
+//    get() = sdkAdditionalData is PyPoetrySdkAdditionalData
+//    set(value) {
+//        val oldData = sdkAdditionalData
+//        val newData = if (value) {
+//            when (oldData) {
+//                is PythonSdkAdditionalData -> PyPoetrySdkAdditionalData(oldData)
+//                else -> PyPoetrySdkAdditionalData()
+//            }
+//        } else {
+//            when (oldData) {
+//                is PyPoetrySdkAdditionalData -> PythonSdkAdditionalData(PythonSdkFlavor.getFlavor(this))
+//                else -> oldData
+//            }
+//        }
+//        val modificator = sdkModificator
+//        modificator.sdkAdditionalData = newData
+//        ApplicationManager.getApplication().runWriteAction { modificator.commitChanges() }
+//    }
 
 /**
  * The user-set persisted path to the poetry executable.
@@ -151,8 +151,10 @@ fun setupPoetrySdkUnderProgress(project: Project?,
     }
     val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)})"
     return createSdkByGenerateTask(task, existingSdks, null, projectPath, suggestedName)?.apply {
-        isPoetry = true
         associateWithModule(module ?: project?.modules?.firstOrNull(), newProjectPath)
+        project?.let { project ->
+            PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(homePath!!)
+        }
     }
 }
 
@@ -177,17 +179,8 @@ fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPa
 }
 
 
-val sdkCache = mutableMapOf<String, Boolean>()
-fun isPoetry(projectPath: @SystemDependent String?, pythonPath: String?): @SystemDependent Boolean {
-    if (projectPath == null || pythonPath == null) return false
-    return sdkCache.getOrElse("$projectPath POETRY_PLUGIN $pythonPath") {
-        try {
-            runPoetry(projectPath, "env", "use", pythonPath)
-            true
-        } catch (e: PyExecutionException) {
-            false
-        }
-    }
+fun isPoetry(project: Project): Boolean {
+    return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains(project.pythonSdk?.homePath)
 }
 
 /**
@@ -276,7 +269,7 @@ class UsePoetryQuickFix(sdk: Sdk?, module: Module) : LocalQuickFix {
             val existingSdks = sdksModel.sdks.filter { it.sdkType is PythonSdkType }
             // XXX: Should we show an error message on exceptions and on null?
             val newSdk = setupPoetrySdkUnderProgress(project, module, existingSdks, null, null, false) ?: return
-            val existingSdk = existingSdks.find { isPoetry(project.basePath, it.homePath) && it.homePath == newSdk.homePath }
+            val existingSdk = existingSdks.find { isPoetry(project) && it.homePath == newSdk.homePath }
             val sdk = existingSdk ?: newSdk
             if (sdk == newSdk) {
                 SdkConfigurationUtil.addSdk(newSdk)
@@ -285,6 +278,8 @@ class UsePoetryQuickFix(sdk: Sdk?, module: Module) : LocalQuickFix {
             }
             project.pythonSdk = sdk
             module.pythonSdk = sdk
+            PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(sdk.homePath!!)
+
         }
     }
 
@@ -308,10 +303,12 @@ class PoetryInstallQuickFix : LocalQuickFix {
     companion object {
         fun poetryInstall(project: Project, module: Module) {
             val sdk = module.pythonSdk ?: return
-            if (!isPoetry(project.basePath, sdk.homePath)) return
+            if (!isPoetry(project)) return
             val listener = PyPackageRequirementsInspection.RunningPackagingTasksListener(module)
             val ui = PyPackageManagerUI(project, sdk, listener)
             ui.install(null, listOf())
+            PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(sdk.homePath!!)
+
         }
     }
 
@@ -407,10 +404,7 @@ class PyProjectTomlWatcher : EditorFactoryListener {
         val project = editor.project ?: return false
         val module = file.getModule(project) ?: return false
         if (module.pyProjectToml != file) return false
-        val basePath = project.basePath ?: return false
-        val pythonPath = module.pythonSdk?.homePath ?: return false
-        return isPoetry(basePath, pythonPath)
-//        return module.pythonSdk?.isPoetry == true
+        return isPoetry(project)
     }
 }
 
