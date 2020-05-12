@@ -1,5 +1,5 @@
 // Copyright 2000-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
-package com.jetbrains.python.packaging.pipenv
+package com.koxudaxi.poetry
 
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -22,7 +22,12 @@ import com.jetbrains.python.sdk.pythonSdk
 /**
  * @author vlan
  */
-class PyPipEnvPackageManager(val sdk: Sdk) : PyPackageManager() {
+
+/**
+ *  This source code is edited by @koxudaxi  (Koudai Aono)
+ */
+
+class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
   @Volatile
   private var packages: List<PyPackage>? = null
 

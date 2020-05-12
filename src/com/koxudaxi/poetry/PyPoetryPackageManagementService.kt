@@ -1,5 +1,5 @@
 // Copyright 2000-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
-package com.jetbrains.python.packaging.pipenv
+package com.koxudaxi.poetry
 
 import com.intellij.execution.ExecutionException
 import com.intellij.openapi.project.Project
@@ -14,7 +14,12 @@ import com.jetbrains.python.sdk.pipenv.pipFileLockSources
 /**
  * @author vlan
  */
-class PyPipEnvPackageManagementService(project: Project, sdk: Sdk) : PyPackageManagementService(project, sdk) {
+
+/**
+ *  This source code is edited by @koxudaxi  (Koudai Aono)
+ */
+
+class PyPoetryPackageManagementService(project: Project, sdk: Sdk) : PyPackageManagementService(project, sdk) {
   override fun getAllRepositories(): List<String>? = null
 
   override fun canInstallToUser() = false
