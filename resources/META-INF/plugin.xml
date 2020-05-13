@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.0.3</2>
+    <p>Features</p>
+    <ul>
+        <li>add installing from poetry.lock [#10] </li>
+    <ul>
     <h2>version 0.0.2</2>
     <p>Features</p>
     <ul>
@@ -42,8 +47,12 @@
         <projectService serviceImplementation="com.koxudaxi.poetry.PoetryConfigService"/>
         <localInspection language="Python" shortName="PoetryInterpreterInspection" suppressId="PoetryInterpreter" bundle="messages.PyPsiBundle" displayName="Invalid Poetry interpreter configured" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryInterpreterInspection"/>
         <localInspection language="Python" shortName="PoetryPackageRequirementsInspection" suppressId="PoetryPackageRequirements" bundle="messages.PyPsiBundle" displayName="Poetry Package requirements" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryPackageRequirementsInspection"/>
+        <applicationService serviceInterface="com.koxudaxi.poetry.PyPoetryPackageManagers"
+                            serviceImplementation="com.koxudaxi.poetry.PyPoetryPackageManagersImpl"/>
     </extensions>
     <projectListeners>
+        <listener class="com.koxudaxi.poetry.PoetryPackageManagerListener"
+                  topic="com.jetbrains.python.packaging.PyPackageManager$Listener"/>
     </projectListeners>
     <extensions defaultExtensionNs="Pythonid">
         <pyAddSdkProvider implementation="com.koxudaxi.poetry.PyAddPoetrySdkProvider"/>

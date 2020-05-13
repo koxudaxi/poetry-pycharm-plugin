@@ -1,8 +1,7 @@
 // Copyright 2000-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 package com.koxudaxi.poetry
 
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
+import PoetryPackageManagerUI
 import com.google.gson.annotations.SerializedName
 import com.intellij.CommonBundle
 import com.intellij.codeInspection.LocalQuickFix
@@ -48,9 +47,9 @@ import com.intellij.util.PathUtil
 import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
-import com.jetbrains.python.sdk.flavors.PythonSdkFlavor
 import com.jetbrains.python.statistics.modules
 import icons.PythonIcons
+import org.apache.tuweni.toml.*
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
 import java.io.File
@@ -179,8 +178,8 @@ fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPa
 }
 
 
-fun isPoetry(project: Project): Boolean {
-    return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains(project.pythonSdk?.homePath)
+fun isPoetry(project: Project, sdk: Sdk? = null): Boolean {
+    return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains (sdk?.homePath ?: project.pythonSdk?.homePath)
 }
 
 /**
@@ -239,15 +238,15 @@ fun detectAndSetupPoetry(project: Project?, module: Module?, existingSdks: List<
 /**
  * The URLs of package sources configured in the Pipfile.lock of the module associated with this SDK.
  */
-val Sdk.pyProjectTomlLockSources: List<String>
-    get() = parsePyProjectTomlLock()?.meta?.sources?.mapNotNull { it.url } ?: listOf(POETRY_DEFAULT_SOURCE_URL)
+//val Sdk.poetryLockSources: List<String>
+//    get() = parsePoetryLock()?.meta?.sources?.mapNotNull { it.url } ?: listOf(POETRY_DEFAULT_SOURCE_URL)
 
 /**
  * The list of requirements defined in the Pipfile.lock of the module associated with this SDK.
  */
-val Sdk.pyProjectTomlLockRequirements: List<PyRequirement>?
+val Sdk.poetryLockRequirements: List<PyRequirement>?
     get() {
-        return pyProjectTomlLock?.let { getPyProjectTomlLockRequirements(it, packageManager) }
+        return poetryLock?.let { getPoetryLockRequirements(it, packageManager) }
     }
 
 /**
@@ -304,11 +303,11 @@ class PoetryInstallQuickFix : LocalQuickFix {
         fun poetryInstall(project: Project, module: Module) {
             val sdk = module.pythonSdk ?: return
             if (!isPoetry(project)) return
+            // TODO: create UI
             val listener = PyPackageRequirementsInspection.RunningPackagingTasksListener(module)
-            val ui = PyPackageManagerUI(project, sdk, listener)
+            val ui = PoetryPackageManagerUI(project, sdk, listener)
             ui.install(null, listOf())
             PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(sdk.homePath!!)
-
         }
     }
 
@@ -354,7 +353,7 @@ class PyProjectTomlWatcher : EditorFactoryListener {
     private fun notifyPyProjectTomlChanged(module: Module) {
         if (module.getUserData(notificationActive) == true) return
         val what = when {
-            module.pyProjectTomlLock == null -> "not found"
+            module.poetryLock == null -> "not found"
             else -> "out of date"
         }
         val title = "$POETRY_LOCK is $what"
@@ -377,27 +376,6 @@ class PyProjectTomlWatcher : EditorFactoryListener {
         notification.notify(module.project)
     }
 
-    private fun runPoetryInBackground(module: Module, args: List<String>, description: String) {
-        val task = object : Task.Backgroundable(module.project, StringUtil.toTitleCase(description), true) {
-            override fun run(indicator: ProgressIndicator) {
-                val sdk = module.pythonSdk ?: return
-                indicator.text = "$description..."
-                try {
-                    runPoetry(sdk, *args.toTypedArray())
-                } catch (e: RunCanceledByUserException) {
-                } catch (e: ExecutionException) {
-                    runInEdt {
-                        Messages.showErrorDialog(project, e.toString(), CommonBundle.message("title.error"))
-                    }
-                } finally {
-                    PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
-                    sdk.associatedModule?.baseDir?.refresh(true, false)
-                }
-            }
-        }
-        ProgressManager.getInstance().run(task)
-    }
-
     private fun isPyProjectTomlEditor(editor: Editor): Boolean {
         val file = editor.document.virtualFile ?: return false
         if (file.name != PY_PROJECT_TOML) return false
@@ -416,60 +394,104 @@ private fun VirtualFile.getModule(project: Project): Module? =
 
 private val LOCK_NOTIFICATION_GROUP = NotificationGroup("$PY_PROJECT_TOML Watcher", NotificationDisplayType.STICKY_BALLOON, false)
 
-private val Sdk.packageManager: PyPackageManager
-    get() = PyPackageManagers.getInstance().forSdk(this)
+private val Sdk.packageManager: PyPoetryPackageManager
+    get() = PyPoetryPackageManager.getInstance(this)
 
 
 @TestOnly
-fun getPyProjectTomlLockRequirements(virtualFile: VirtualFile, packageManager: PyPackageManager): List<PyRequirement>? {
-    fun toRequirements(packages: Map<String, PyProjectTomlLockPackage>): List<PyRequirement> =
+fun getPoetryLockRequirements(virtualFile: VirtualFile, packageManager: PyPackageManager): List<PyRequirement>? {
+    fun toRequirements(packages: Map<String, PoetryLockPackage>): List<PyRequirement> =
             packages
                     .asSequence()
-                    .filterNot { (_, pkg) -> pkg.editable ?: false }
+//                    .filterNot { (_, pkg) -> pkg.editable ?: false }
                     // TODO: Support requirements markers (PEP 496), currently any packages with markers are ignored due to PY-30803
-                    .filter { (_, pkg) -> pkg.markers == null }
+//                    .filter { (_, pkg) -> pkg.markers == null }
                     .flatMap { (name, pkg) -> packageManager.parseRequirements("$name${pkg.version ?: ""}").asSequence() }
                     .toList()
 
-    val pyProjectTomlLock = parsePyProjectTomlLock(virtualFile) ?: return null
-    val packages = pyProjectTomlLock.packages?.let { toRequirements(it) } ?: emptyList()
-    val devPackages = pyProjectTomlLock.devPackages?.let { toRequirements(it) } ?: emptyList()
+    val poetryLock = parsePoetryLock(virtualFile) ?: return null
+    val packages = poetryLock.packages?.let { toRequirements(it) } ?: emptyList()
+    val devPackages = poetryLock.devPackages?.let { toRequirements(it) } ?: emptyList()
     return packages + devPackages
 }
 
-private fun Sdk.parsePyProjectTomlLock(): PyProjectTomlLock? {
+private fun Sdk.parsePoetryLock(): PoetryLock? {
     // TODO: Log errors if poetry.lock is not found
-    val file = pyProjectTomlLock ?: return null
-    return parsePyProjectTomlLock(file)
+    val file = poetryLock ?: return null
+    return parsePoetryLock(file)
 }
 
-private fun parsePyProjectTomlLock(virtualFile: VirtualFile): PyProjectTomlLock? {
-    val text = ReadAction.compute<String, Throwable> { FileDocumentManager.getInstance().getDocument(virtualFile)?.text }
-    return try {
-        Gson().fromJson(text, PyProjectTomlLock::class.java)
-    } catch (e: JsonSyntaxException) {
-        // TODO: Log errors
-        return null
-    }
-}
+//private fun parsePoetryLock(virtualFile: VirtualFile): PoetryLock? {
+//    val text = ReadAction.compute<String, Throwable> { FileDocumentManager.getInstance().getDocument(virtualFile)?.text }
+//    return try {
+//        Gson().fromJson(text, PoetryLock::class.java)
+//    } catch (e: JsonSyntaxException) {
+//        // TODO: Log errors
+//        return null
+//    }
+//}
 
-val Sdk.pyProjectTomlLock: VirtualFile?
+val Sdk.poetryLock: VirtualFile?
     get() =
         associatedModulePath?.let { StandardFileSystems.local().findFileByPath(it)?.findChild(POETRY_LOCK) }
 
-private val Module.pyProjectTomlLock: VirtualFile?
+private val Module.poetryLock: VirtualFile?
     get() = baseDir?.findChild(POETRY_LOCK)
 
-private data class PyProjectTomlLock(@SerializedName("_meta") var meta: PyProjectTomlLockMeta?,
-                                     @SerializedName("default") var packages: Map<String, PyProjectTomlLockPackage>?,
-                                     @SerializedName("develop") var devPackages: Map<String, PyProjectTomlLockPackage>?)
+private fun parsePoetryLock(pyProjectToml: VirtualFile): PoetryLock? {
+    val text = ReadAction.compute<String, Throwable> { FileDocumentManager.getInstance().getDocument(pyProjectToml)?.text }
+    try {
+        val result: TomlParseResult = Toml.parse(text)
+        val packages = result.getArrayOrEmpty("package")
+        if (packages.isEmpty) return null
+        return PoetryLock(packages = packages.toList().filterIsInstance(TomlTable::class.java).map {
+            Pair(it["name"] as String,
+                    PoetryLockPackage(
+                            version = it["version"] as? String
+                    )
+            )
+        }.toMap(), devPackages = null)
 
-private data class PyProjectTomlLockMeta(@SerializedName("sources") var sources: List<PyProjectTomlLockSource>?)
+    } catch (e: Throwable) {
+        if (e is IllegalArgumentException || e is TomlInvalidTypeException || e is ClassCastException) return null
+        throw e
+    }
+}
 
-private data class PyProjectTomlLockSource(@SerializedName("url") var url: String?)
 
-private data class PyProjectTomlLockPackage(@SerializedName("version") var version: String?,
-                                            @SerializedName("editable") var editable: Boolean?,
-                                            @SerializedName("hashes") var hashes: List<String>?,
-                                            @SerializedName("markers") var markers: String?)
+private data class PoetryLock(
+//        @SerializedName("_meta") var meta: PoetryLockMeta?,
+        @SerializedName("packages") var packages: Map<String, PoetryLockPackage>?,
+        @SerializedName("develop") var devPackages: Map<String, PoetryLockPackage>?)
 
+private data class PoetryLockMeta(@SerializedName("sources") var sources: List<PoetryLockSource>?)
+
+private data class PoetryLockSource(@SerializedName("url") var url: String?)
+
+private data class PoetryLockPackage(@SerializedName("version") var version: String?,
+//                                            @SerializedName("editable") var editable: Boolean?,
+                                     @SerializedName("hashes") var hashes: List<String>? = null,
+                                     @SerializedName("markers") var markers: MutableList<Any> = mutableListOf())
+
+
+fun runPoetryInBackground(module: Module, args: List<String>, description: String) {
+    val task = object : Task.Backgroundable(module.project, StringUtil.toTitleCase(description), true) {
+        override fun run(indicator: ProgressIndicator) {
+            val sdk = module.pythonSdk ?: return
+            indicator.text = "$description..."
+            try {
+                runPoetry(sdk, *args.toTypedArray())
+            } catch (e: RunCanceledByUserException) {
+            } catch (e: ExecutionException) {
+                runInEdt {
+                    Messages.showErrorDialog(project, e.toString(), CommonBundle.message("title.error"))
+                }
+            } finally {
+                PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
+                sdk.associatedModule?.baseDir?.refresh(true, false)
+                PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true, notify = true)
+            }
+        }
+    }
+    ProgressManager.getInstance().run(task)
+}
