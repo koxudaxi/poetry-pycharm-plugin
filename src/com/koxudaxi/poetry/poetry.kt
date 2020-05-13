@@ -61,7 +61,8 @@ const val POETRY_DEFAULT_SOURCE_URL: String = "https://pypi.org/simple"
 const val POETRY_PATH_SETTING: String = "PyCharm.Poetry.Path"
 
 // TODO: Provide a special icon for poetry
-val POETRY_ICON: Icon = PythonIcons.Python.PythonClosed
+// TODO: Need a extension point
+//val POETRY_ICON: Icon = PythonIcons.Python.PythonClosed
 
 /**
  *  This source code is edited by @koxudaxi  (Koudai Aono)

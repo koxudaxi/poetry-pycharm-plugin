@@ -9,6 +9,10 @@
     <ul>
         <li>add installing from poetry.lock [#10] </li>
     <ul>
+    <p>Bug fixes</p>
+    <ul>
+        <li>disable custom icon [#11] </li>
+    <ul>
     <h2>version 0.0.2</2>
     <p>Features</p>
     <ul>
