@@ -51,7 +51,10 @@ jobs:
        with:
          tag_name: ${{ github.ref }}
          release_name: Release ${{ github.ref }}
-         body: "${{ env.CHANGELOG_LATEST }}"
+         body: |
+            ```
+            "${{ env.CHANGELOG_LATEST }}"
+            ```
          draft: false
          prerelease: false
      - name: Upload Release Asset
