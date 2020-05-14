@@ -49,7 +49,7 @@ class HistoryHTMLParser(HTMLParser):
                 self.latest = True
             elif self.latest is True:
                 self.latest = False
-                self.markdown_latest_log = self.markdown
+                self.markdown_latest_log = '\n'.join(self.markdown.splitlines()[1:])
             self.markdown += f'## {data.replace("version ", "")}\n'
         elif self.current_tag == Tag.ChangeType:
             self.markdown += f'### {data}\n'
