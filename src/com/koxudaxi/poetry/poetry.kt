@@ -150,10 +150,12 @@ fun setupPoetrySdkUnderProgress(project: Project?,
     val task = object : Task.WithResult<String, ExecutionException>(project, "Setting Up Poetry Environment", true) {
         override fun compute(indicator: ProgressIndicator): String {
             indicator.isIndeterminate = true
-            val poetry = setupPoetry(FileUtil.toSystemDependentName(projectPath), python, installPackages)
+            val init = StandardFileSystems.local().findFileByPath(projectPath)?.findChild(PY_PROJECT_TOML)?.let { getPyProjectTomlForPoetry(it) } == null
+            val poetry = setupPoetry(FileUtil.toSystemDependentName(projectPath), python, installPackages, init)
             return PythonSdkUtil.getPythonExecutable(poetry) ?: FileUtil.join(poetry, "bin", "python")
         }
     }
+
     val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)})"
     return createSdkByGenerateTask(task, existingSdks, null, projectPath, suggestedName)?.apply {
         associateWithModule(module ?: project?.modules?.firstOrNull(), newProjectPath)
@@ -168,17 +170,17 @@ fun setupPoetrySdkUnderProgress(project: Project?,
  *
  * @return the path to the poetry environment.
  */
-fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPackages: Boolean): @SystemDependent String {
+fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPackages: Boolean, init: Boolean): @SystemDependent String {
+    if (init) {
+        runPoetry(projectPath, *listOf("init", "-n").toTypedArray())
+    }
     when {
         installPackages -> {
             python?.let { runPoetry(projectPath, "env", "use", it) }
-            val command = listOf("install")
-            runPoetry(projectPath, *command.toTypedArray())
+            runPoetry(projectPath, "install")
         }
-        python != null ->
-            runPoetry(projectPath, "env", "use", python)
-        else ->
-            runPoetry(projectPath, "run", "python", "-V")
+        python != null -> runPoetry(projectPath, "env", "use", python)
+        else -> runPoetry(projectPath, "run", "python", "-V")
     }
     return runPoetry(projectPath, "env", "info", "-p")
 }

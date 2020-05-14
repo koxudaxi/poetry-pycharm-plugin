@@ -11,6 +11,7 @@ import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.util.UserDataHolder
+import com.intellij.openapi.vfs.StandardFileSystems
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
@@ -27,6 +28,7 @@ import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.event.ItemEvent
 import java.io.File
+import java.lang.NullPointerException
 import java.nio.file.Files
 import javax.swing.Icon
 import javax.swing.JComboBox
@@ -49,6 +51,7 @@ class PyAddPoetryPanel(private val project: Project?,
                        context: UserDataHolder) : PyAddNewEnvPanel() {
     override val envName = "Poetry"
     override val panelName: String get() = "Poetry Environment"
+
     // TODO: Need a extension point
     override val icon: Icon = POETRY_ICON
 
@@ -64,7 +67,7 @@ class PyAddPoetryPanel(private val project: Project?,
     }
 
     private val installPackagesCheckBox = JBCheckBox("Install packages from pyproject.toml").apply {
-        isVisible = newProjectPath == null
+        isVisible = projectPath?.let { StandardFileSystems.local().findFileByPath(it)?.findChild(PY_PROJECT_TOML)?.let { file -> getPyProjectTomlForPoetry(file) } } != null
         isSelected = isVisible
     }
 
@@ -148,7 +151,11 @@ class PyAddPoetryPanel(private val project: Project?,
      * The effective module for which we add a new environment.
      */
     private val selectedModule: Module?
-        get() = module ?: moduleField.selectedItem as? Module
+        get() = module ?: try {
+            moduleField.selectedItem
+        } catch (e: NullPointerException) {
+            null
+        } as? Module
 
     /**
      * Checks if `poetry` is available on `$PATH`.
