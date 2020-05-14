@@ -48,6 +48,7 @@ import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.statistics.modules
+import com.jetbrains.rd.util.catch
 import icons.PythonIcons
 import org.apache.tuweni.toml.Toml
 import org.apache.tuweni.toml.TomlInvalidTypeException
@@ -55,6 +56,7 @@ import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
+import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
@@ -70,12 +72,32 @@ val POETRY_ICON = PythonIcons.Python.Virtualenv
  *  This source code is edited by @koxudaxi  (Koudai Aono)
  */
 
+fun getPyProjectTomlForPoetry(virtualFile: VirtualFile): Pair<Long, VirtualFile?> {
+    return Pair(virtualFile.modificationStamp, try {
+        ReadAction.compute<VirtualFile, Throwable> {
+            Toml.parse(virtualFile.inputStream).getTable("tool.poetry")?.let { virtualFile }
+        }
+    } catch (e: Throwable) {
+        null
+    })
+}
+
 /**
  * The Pipfile found in the main content root of the module.
  */
+val pyProjectTomlCache = mutableMapOf<String, Pair<Long, VirtualFile?>>()
 val Module.pyProjectToml: VirtualFile?
     get() =
-        baseDir?.findChild(PY_PROJECT_TOML)
+        baseDir?.findChild(PY_PROJECT_TOML)?.let { virtualFile ->
+            (this.name + virtualFile.path).let { key ->
+                pyProjectTomlCache.getOrPutNullable(key, { getPyProjectTomlForPoetry(virtualFile) }).let { pair ->
+                    when (virtualFile.modificationStamp) {
+                        pair.first -> pair.second
+                        else -> pyProjectTomlCache.put(key, getPyProjectTomlForPoetry(virtualFile))?.second
+                    }
+                }
+            }
+        }
 
 /**
  * Tells if the SDK was added as a poetry.
@@ -252,7 +274,8 @@ class UsePoetryQuickFix(sdk: Sdk?, module: Module) : LocalQuickFix {
             }
             val existingSdks = sdksModel.sdks.filter { it.sdkType is PythonSdkType }
             // XXX: Should we show an error message on exceptions and on null?
-            val newSdk = setupPoetrySdkUnderProgress(project, module, existingSdks, null, null, false) ?: return
+            val newSdk = setupPoetrySdkUnderProgress(project, module, existingSdks, null, null, false)
+                    ?: return
             val existingSdk = existingSdks.find { isPoetry(project) && it.homePath == newSdk.homePath }
             val sdk = existingSdk ?: newSdk
             if (sdk == newSdk) {
@@ -366,8 +389,8 @@ class PyProjectTomlWatcher : EditorFactoryListener {
         if (file.name != PY_PROJECT_TOML) return false
         val project = editor.project ?: return false
         val module = file.getModule(project) ?: return false
-        if (module.pyProjectToml != file) return false
-        return isPoetry(project)
+        if (!isPoetry(project)) return false
+        return module.pyProjectToml == file
     }
 }
 
@@ -468,7 +491,7 @@ fun runPoetryInBackground(module: Module, args: List<String>, description: Strin
             } finally {
                 PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
                 sdk.associatedModule?.baseDir?.refresh(true, false)
-                if(isPoetry(project)) {
+                if (isPoetry(project)) {
                     PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true, notify = true)
                 }
             }
