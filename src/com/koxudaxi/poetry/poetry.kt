@@ -2,6 +2,7 @@
 package com.koxudaxi.poetry
 
 import PoetryPackageManagerUI
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.intellij.CommonBundle
 import com.intellij.codeInspection.LocalQuickFix
@@ -48,12 +49,11 @@ import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.statistics.modules
-import icons.PythonIcons
-import org.apache.tuweni.toml.*
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
+import org.tomlj.Toml
+import org.tomlj.TomlInvalidTypeException
 import java.io.File
-import javax.swing.Icon
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
 const val POETRY_LOCK: String = "poetry.lock"
@@ -180,7 +180,8 @@ fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPa
 
 
 fun isPoetry(project: Project, sdk: Sdk? = null): Boolean {
-    return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains (sdk?.homePath ?: project.pythonSdk?.homePath)
+    return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains(sdk?.homePath
+            ?: project.pythonSdk?.homePath)
 }
 
 /**
@@ -401,19 +402,22 @@ private val Sdk.packageManager: PyPoetryPackageManager
 
 @TestOnly
 fun getPoetryLockRequirements(virtualFile: VirtualFile, packageManager: PyPackageManager): List<PyRequirement>? {
+    fun getVersion(version: String): String {
+        return if (Regex("^0-9").containsMatchIn(version)) "==$version" else version
+    }
+
     fun toRequirements(packages: Map<String, PoetryLockPackage>): List<PyRequirement> =
             packages
                     .asSequence()
 //                    .filterNot { (_, pkg) -> pkg.editable ?: false }
                     // TODO: Support requirements markers (PEP 496), currently any packages with markers are ignored due to PY-30803
 //                    .filter { (_, pkg) -> pkg.markers == null }
-                    .flatMap { (name, pkg) -> packageManager.parseRequirements("$name${pkg.version ?: ""}").asSequence() }
+                    .flatMap { (name, pkg) -> packageManager.parseRequirements("$name${pkg.version?.let { getVersion(it) } ?: ""}").asSequence() }
                     .toList()
 
+    //TODO: Support extras
     val poetryLock = parsePoetryLock(virtualFile) ?: return null
-    val packages = poetryLock.packages?.let { toRequirements(it) } ?: emptyList()
-    val devPackages = poetryLock.devPackages?.let { toRequirements(it) } ?: emptyList()
-    return packages + devPackages
+    return poetryLock.packages?.let { toRequirements(it) } ?: emptyList()
 }
 
 private fun Sdk.parsePoetryLock(): PoetryLock? {
@@ -453,27 +457,28 @@ private fun parsePoetryLock(pyProjectToml: VirtualFile): PoetryLock? {
             )
         }.toMap(), devPackages = null)
 
-    } catch (e: Throwable) {
-        if (e is IllegalArgumentException || e is TomlInvalidTypeException || e is ClassCastException) return null
-        throw e
+        return try {
+            Gson().fromJson(Toml.parse(text).toJson(), PoetryLock::class.java)
+        } catch (e: Throwable) {
+            if (e is IllegalArgumentException || e is TomlInvalidTypeException || e is ClassCastException) return null
+            throw e
+        }
     }
 }
 
-
 private data class PoetryLock(
-//        @SerializedName("_meta") var meta: PoetryLockMeta?,
-        @SerializedName("packages") var packages: Map<String, PoetryLockPackage>?,
-        @SerializedName("develop") var devPackages: Map<String, PoetryLockPackage>?)
+        @SerializedName("package") var packages: Map<String, PoetryLockPackage>?)
 
-private data class PoetryLockMeta(@SerializedName("sources") var sources: List<PoetryLockSource>?)
+//private data class PoetryLockMeta(@SerializedName("sources") var sources: List<PoetryLockSource>?)
 
 private data class PoetryLockSource(@SerializedName("url") var url: String?)
 
 private data class PoetryLockPackage(@SerializedName("version") var version: String?,
+//                                     @SerializedName("category") var category: String?,
 //                                            @SerializedName("editable") var editable: Boolean?,
                                      @SerializedName("hashes") var hashes: List<String>? = null,
-                                     @SerializedName("markers") var markers: MutableList<Any> = mutableListOf())
-
+                                     @SerializedName("markers") var markers: MutableList<Any> = mutableListOf(),
+                                     @SerializedName("extras") var extras: List<MutableMap<String, List<String>>>?)
 
 fun runPoetryInBackground(module: Module, args: List<String>, description: String) {
     val task = object : Task.Backgroundable(module.project, StringUtil.toTitleCase(description), true) {
