@@ -10,6 +10,8 @@
 ## Help
 See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more details.
 
+## Demo
+![poetry_demo1](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/poetry_demo1.gif)
 
 ##  Features
 ### Implemented
