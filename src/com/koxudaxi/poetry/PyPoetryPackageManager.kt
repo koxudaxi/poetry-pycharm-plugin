@@ -1,7 +1,6 @@
 // Copyright 2000-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 package com.koxudaxi.poetry
 
-import com.google.gson.annotations.SerializedName
 import com.intellij.execution.ExecutionException
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
@@ -14,7 +13,6 @@ import com.jetbrains.python.sdk.PythonSdkType
 import com.jetbrains.python.sdk.associatedModule
 import com.jetbrains.python.sdk.baseDir
 import com.jetbrains.python.sdk.pipenv.runPipEnv
-import com.jetbrains.python.sdk.pythonSdk
 
 /**
  * @author vlan
@@ -28,11 +26,14 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     @Volatile
     private var packages: List<PyPackage>? = null
 
+    private var requirements: List<PyRequirement>? = null
+
     init {
         PyPackageUtil.runOnChangeUnderInterpreterPaths(sdk) {
             PythonSdkType.getInstance().setupSdkPaths(sdk)
         }
     }
+
     override fun installManagement() {}
     override fun refreshAndGetPackages(alwaysRefresh: Boolean): List<PyPackage> {
         return refreshAndGetPackages(alwaysRefresh, true)
@@ -86,6 +87,8 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
 
     override fun getPackages() = packages
 
+    fun getRequirements() = requirements
+
     fun refreshAndGetPackages(alwaysRefresh: Boolean, notify: Boolean): List<PyPackage> {
         if (alwaysRefresh || packages == null) {
             packages = null
@@ -95,16 +98,17 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
                 packages = emptyList()
                 throw e
             }
-            packages = parsePoetryInstallDryRun(output)
+            val allPackage = parsePoetryInstallDryRun(output)
+            packages = allPackage.first
+            requirements = allPackage.second
             if (notify) {
-                ApplicationManager.getApplication().messageBus.syncPublisher(PyPackageManager.PACKAGE_MANAGER_TOPIC).packagesRefreshed(sdk)
+                ApplicationManager.getApplication().messageBus.syncPublisher(PACKAGE_MANAGER_TOPIC).packagesRefreshed(sdk)
             }
         }
         return packages ?: emptyList()
     }
 
-    override fun getRequirements(module: Module): List<PyRequirement>? =
-            module.pythonSdk?.poetryLockRequirements
+    override fun getRequirements(module: Module): List<PyRequirement>? = requirements
 
     override fun parseRequirements(text: String): List<PyRequirement> =
             PyRequirementParser.fromText(text)
@@ -124,26 +128,44 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         fun getInstance(sdk: Sdk): PyPoetryPackageManager {
             return PyPoetryPackageManagers.getInstance().forSdk(sdk)
         }
-        private data class GraphPackage(@SerializedName("key") var key: String,
-                                        @SerializedName("package_name") var packageName: String,
-                                        @SerializedName("installed_version") var installedVersion: String,
-                                        @SerializedName("required_version") var requiredVersion: String?)
+    }
 
-        private data class GraphEntry(@SerializedName("package") var pkg: GraphPackage,
-                                      @SerializedName("dependencies") var dependencies: List<GraphPackage>)
+    private fun getVersion(version: String): String {
+        return if (Regex("^[0-9]").containsMatchIn(version)) "==$version" else version
+    }
 
-        /**
-         * Parses the output of `poetry install --dry-run ` into a list of packages.
-         */
-        private fun parsePoetryInstallDryRun(input: String): List<PyPackage> = input
+    private fun toRequirements(packages: List<PyPackage>): List<PyRequirement> =
+            packages
+                    .asSequence()
+//                    .filterNot { (_, pkg) -> pkg.editable ?: false }
+                    // TODO: Support requirements markers (PEP 496), currently any packages with markers are ignored due to PY-30803
+//                    .filter { (_, pkg) -> pkg.markers == null }
+                    .flatMap { it -> this.parseRequirements("${it.name}${it.version?.let { getVersion(it) } ?: ""}").asSequence() }
+                    .toList()
+
+    /**
+     * Parses the output of `poetry install --dry-run ` into a list of packages.
+     */
+    private fun parsePoetryInstallDryRun(input: String): Pair<List<PyPackage>, List<PyRequirement>> {
+        fun getNameAndVersion(line: String): Pair<String, String> {
+            return line.split(" ").let {
+                Pair(it[4], it[5].replace(Regex("[()]"), ""))
+            }
+        }
+
+        val pyPackages = mutableListOf<PyPackage>()
+        val pyRequirements = mutableListOf<PyRequirement>()
+        input
                 .lineSequence()
                 .filter { it.endsWith(")") }
-                .map {
-                    it.split(" ").let { splitLine ->
-                        PyPackage(splitLine[4], splitLine[5].replace(Regex("[()]"), ""), null, emptyList())
+                .forEach { line ->
+                    getNameAndVersion(line).also {
+                        when {
+                            line.contains("Already installed") -> pyPackages.add(PyPackage(it.first, it.second, null, emptyList()))
+                            line.contains("Installing") -> pyRequirements.addAll(this.parseRequirements(it.first + getVersion(it.second)).asSequence())
+                        }
                     }
                 }
-                .distinct()
-                .toList()
+        return Pair(pyPackages.distinct().toList(), pyRequirements.distinct().toList())
     }
 }

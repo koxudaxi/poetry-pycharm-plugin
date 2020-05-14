@@ -106,12 +106,9 @@ class PoetryPackageRequirementsInspection : PyInspection() {
         private fun findUnsatisfiedRequirements(module: Module, sdk: Sdk,
                                                 ignoredPackages: Set<String>): List<PyRequirement> {
             val manager = PyPoetryPackageManager.getInstance(sdk)
-            val requirements = manager.getRequirements(module) ?: emptyList()
+            val requirements = manager.getRequirements() ?: emptyList()
 
-            // TODO: Run this method when set sdk
-//            manager.refreshAndGetPackages(false)
             val packages = manager.packages ?: return emptyList()
-            if (packages.isEmpty()) return emptyList()
             val packagesInModule: List<PyPackage> = collectPackagesInModule(module)
             val unsatisfied: MutableList<PyRequirement> = ArrayList()
             for (req in requirements) {

@@ -51,7 +51,7 @@ import java.util.*
  *  This source code is edited by @koxudaxi  (Koudai Aono)
  */
 
-class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: Sdk, private val myListener:  PyPackageRequirementsInspection.RunningPackagingTasksListener) {
+class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: Sdk, private val myListener: PyPackageRequirementsInspection.RunningPackagingTasksListener) {
 
     interface Listener {
         fun started()
@@ -70,7 +70,7 @@ class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: 
         if (checkDependents(packages)) {
             return
         }
-        ProgressManager.getInstance().run(UninstallTask(myProject, mySdk, myListener, packages as List<PyPackage>))
+        packages.filterIsInstance<PyPackage>().let { ProgressManager.getInstance().run(UninstallTask(myProject, mySdk, myListener, it)) }
     }
 
     private fun checkDependents(packages: List<PyPackage?>): Boolean {

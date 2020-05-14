@@ -2,7 +2,6 @@
 package com.koxudaxi.poetry
 
 import PoetryPackageManagerUI
-import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.intellij.CommonBundle
 import com.intellij.codeInspection.LocalQuickFix
@@ -49,10 +48,13 @@ import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.statistics.modules
+import icons.PythonIcons
+import org.apache.tuweni.toml.Toml
+import org.apache.tuweni.toml.TomlInvalidTypeException
+import org.apache.tuweni.toml.TomlParseResult
+import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
-import org.tomlj.Toml
-import org.tomlj.TomlInvalidTypeException
 import java.io.File
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
@@ -62,7 +64,7 @@ const val POETRY_PATH_SETTING: String = "PyCharm.Poetry.Path"
 
 // TODO: Provide a special icon for poetry
 // TODO: Need a extension point
-//val POETRY_ICON: Icon = PythonIcons.Python.PythonClosed
+val POETRY_ICON = PythonIcons.Python.Virtualenv
 
 /**
  *  This source code is edited by @koxudaxi  (Koudai Aono)
@@ -78,25 +80,6 @@ val Module.pyProjectToml: VirtualFile?
 /**
  * Tells if the SDK was added as a poetry.
  */
-//var Sdk.isPoetry: Boolean
-//    get() = sdkAdditionalData is PyPoetrySdkAdditionalData
-//    set(value) {
-//        val oldData = sdkAdditionalData
-//        val newData = if (value) {
-//            when (oldData) {
-//                is PythonSdkAdditionalData -> PyPoetrySdkAdditionalData(oldData)
-//                else -> PyPoetrySdkAdditionalData()
-//            }
-//        } else {
-//            when (oldData) {
-//                is PyPoetrySdkAdditionalData -> PythonSdkAdditionalData(PythonSdkFlavor.getFlavor(this))
-//                else -> oldData
-//            }
-//        }
-//        val modificator = sdkModificator
-//        modificator.sdkAdditionalData = newData
-//        ApplicationManager.getApplication().runWriteAction { modificator.commitChanges() }
-//    }
 
 /**
  * The user-set persisted path to the poetry executable.
@@ -244,11 +227,11 @@ fun detectAndSetupPoetry(project: Project?, module: Module?, existingSdks: List<
 //    get() = parsePoetryLock()?.meta?.sources?.mapNotNull { it.url } ?: listOf(POETRY_DEFAULT_SOURCE_URL)
 
 /**
- * The list of requirements defined in the Pipfile.lock of the module associated with this SDK.
+ * The list of requirements defined in the poetry.lock of the module associated with this SDK.
  */
 val Sdk.poetryLockRequirements: List<PyRequirement>?
     get() {
-        return poetryLock?.let { getPoetryLockRequirements(it, packageManager) }
+        return poetryLock?.let { PyPoetryPackageManager.getInstance(this).getRequirements() }
     }
 
 /**
@@ -403,7 +386,7 @@ private val Sdk.packageManager: PyPoetryPackageManager
 @TestOnly
 fun getPoetryLockRequirements(virtualFile: VirtualFile, packageManager: PyPackageManager): List<PyRequirement>? {
     fun getVersion(version: String): String {
-        return if (Regex("^0-9").containsMatchIn(version)) "==$version" else version
+        return if (Regex("^[0-9]").containsMatchIn(version)) "==$version" else version
     }
 
     fun toRequirements(packages: Map<String, PoetryLockPackage>): List<PyRequirement> =
@@ -426,16 +409,6 @@ private fun Sdk.parsePoetryLock(): PoetryLock? {
     return parsePoetryLock(file)
 }
 
-//private fun parsePoetryLock(virtualFile: VirtualFile): PoetryLock? {
-//    val text = ReadAction.compute<String, Throwable> { FileDocumentManager.getInstance().getDocument(virtualFile)?.text }
-//    return try {
-//        Gson().fromJson(text, PoetryLock::class.java)
-//    } catch (e: JsonSyntaxException) {
-//        // TODO: Log errors
-//        return null
-//    }
-//}
-
 val Sdk.poetryLock: VirtualFile?
     get() =
         associatedModulePath?.let { StandardFileSystems.local().findFileByPath(it)?.findChild(POETRY_LOCK) }
@@ -445,26 +418,26 @@ private val Module.poetryLock: VirtualFile?
 
 private fun parsePoetryLock(pyProjectToml: VirtualFile): PoetryLock? {
     val text = ReadAction.compute<String, Throwable> { FileDocumentManager.getInstance().getDocument(pyProjectToml)?.text }
-    try {
+    return try {
         val result: TomlParseResult = Toml.parse(text)
         val packages = result.getArrayOrEmpty("package")
         if (packages.isEmpty) return null
-        return PoetryLock(packages = packages.toList().filterIsInstance(TomlTable::class.java).map {
+        PoetryLock(packages = packages.toList().filterIsInstance(TomlTable::class.java).map {
             Pair(it["name"] as String,
                     PoetryLockPackage(
                             version = it["version"] as? String
                     )
             )
-        }.toMap(), devPackages = null)
+        }.toMap())
 
-        return try {
-            Gson().fromJson(Toml.parse(text).toJson(), PoetryLock::class.java)
-        } catch (e: Throwable) {
-            if (e is IllegalArgumentException || e is TomlInvalidTypeException || e is ClassCastException) return null
-            throw e
-        }
+//        return try {
+//            Gson().fromJson(Toml.parse(text).toJson(), PoetryLock::class.java)
+    } catch (e: Throwable) {
+        if (e is IllegalArgumentException || e is TomlInvalidTypeException || e is ClassCastException) return null
+        throw e
     }
 }
+
 
 private data class PoetryLock(
         @SerializedName("package") var packages: Map<String, PoetryLockPackage>?)
@@ -478,7 +451,7 @@ private data class PoetryLockPackage(@SerializedName("version") var version: Str
 //                                            @SerializedName("editable") var editable: Boolean?,
                                      @SerializedName("hashes") var hashes: List<String>? = null,
                                      @SerializedName("markers") var markers: MutableList<Any> = mutableListOf(),
-                                     @SerializedName("extras") var extras: List<MutableMap<String, List<String>>>?)
+                                     @SerializedName("extras") var extras: List<MutableMap<String, List<String>>>? = null)
 
 fun runPoetryInBackground(module: Module, args: List<String>, description: String) {
     val task = object : Task.Backgroundable(module.project, StringUtil.toTitleCase(description), true) {
@@ -495,7 +468,9 @@ fun runPoetryInBackground(module: Module, args: List<String>, description: Strin
             } finally {
                 PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
                 sdk.associatedModule?.baseDir?.refresh(true, false)
-                PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true, notify = true)
+                if(isPoetry(project)) {
+                    PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true, notify = true)
+                }
             }
         }
     }

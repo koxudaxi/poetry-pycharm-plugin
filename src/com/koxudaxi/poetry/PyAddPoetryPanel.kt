@@ -50,7 +50,7 @@ class PyAddPoetryPanel(private val project: Project?,
     override val envName = "Poetry"
     override val panelName: String get() = "Poetry Environment"
     // TODO: Need a extension point
-    // override val icon: Icon = POETRY_ICON
+    override val icon: Icon = POETRY_ICON
 
     private val moduleField: JComboBox<Module>
 
