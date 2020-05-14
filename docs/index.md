@@ -14,6 +14,7 @@ See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more 
 ##  Features
 ### Implemented
 - add a interpreter with pyproject.toml
+- install packages from poetry.lock
 - update and lock with a popup
 - show a message and a link to fix settings (QuickFix)
 
