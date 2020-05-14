@@ -14,7 +14,7 @@ import java.io.File
 
 object PyPoetrySdkFlavor : CPythonSdkFlavor() {
   // TODO: Need a extension point
-  // override fun getIcon() = POETRY_ICON
+   override fun getIcon() = POETRY_ICON
 
   override fun isValidSdkPath(file: File) = false
 }
