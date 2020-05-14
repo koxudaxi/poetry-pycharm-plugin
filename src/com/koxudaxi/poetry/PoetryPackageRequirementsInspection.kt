@@ -30,6 +30,7 @@ import com.jetbrains.python.packaging.PyPackageUtil
 import com.jetbrains.python.packaging.PyRequirement
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.psi.PyUtil
+import com.jetbrains.python.sdk.associatedModule
 import com.jetbrains.python.sdk.pythonSdk
 import one.util.streamex.StreamEx
 import java.util.*
@@ -125,6 +126,7 @@ class PoetryPackageRequirementsInspection : PyInspection() {
 //                val sdk = PythonSdkUtil.findPythonSdk(module)
                 val sdk = module.project.pythonSdk ?: return
                 if (!isPoetry(file.project)) return
+                if (sdk.associatedModule?.pyProjectToml == null) return
                 val unsatisfied: List<PyRequirement> = findUnsatisfiedRequirements(module, sdk, myIgnoredPackages)
                  if (unsatisfied.isNotEmpty()) {
                     val plural = unsatisfied.size > 1
