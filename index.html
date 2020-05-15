@@ -247,6 +247,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#quick-installation" class="md-nav__link">
+    Quick Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#features" class="md-nav__link">
     Features
   </a>
@@ -271,18 +278,12 @@
     TODO
   </a>
   
-    <nav class="md-nav" aria-label="TODO">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#complied-binary" class="md-nav__link">
-    Complied binary
-  </a>
-  
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#feature-restrictions" class="md-nav__link">
+    Feature Restrictions
+  </a>
   
 </li>
       
@@ -404,6 +405,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#quick-installation" class="md-nav__link">
+    Quick Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#features" class="md-nav__link">
     Features
   </a>
@@ -428,18 +436,12 @@
     TODO
   </a>
   
-    <nav class="md-nav" aria-label="TODO">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#complied-binary" class="md-nav__link">
-    Complied binary
-  </a>
-  
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#feature-restrictions" class="md-nav__link">
+    Feature Restrictions
+  </a>
   
 </li>
       
@@ -493,14 +495,18 @@
                 
                 <h1 id="poetry-pycharm-plugin">Poetry PyCharm Plugin<a class="headerlink" href="#poetry-pycharm-plugin" title="Permanent link">🔗</a></h1>
 <p><img alt="CI" src="https://github.com/koxudaxi/poetry-pycharm-plugin/workflows/CI/badge.svg" />
-<a href="https://codecov.io/gh/koxudaxi/poetry-pycharm-plugin"><img alt="codecov" src="https://codecov.io/gh/koxudaxi/poetry-pycharm-plugin/branch/master/graph/badge.svg" /></a>
+<a href="https://plugins.jetbrains.com/plugin/14307-poetry"><img alt="" src="https://img.shields.io/jetbrains/plugin/v/14307" /></a>
 <img alt="license" src="https://img.shields.io/github/license/koxudaxi/poetry-pycharm-plugin.svg" /></p>
-<p><a href="">A JetBrains PyCharm plugin</a> for <a href="https://python-poetry.org/"><code>poetry</code></a>.</p>
+<p><a href="https://plugins.jetbrains.com/plugin/14307-poetry">A JetBrains PyCharm plugin</a> for <a href="https://python-poetry.org/"><code>poetry</code></a>.</p>
 <h2 id="this-project-is-currently-in-an-experimental-phase">This project is currently in an experimental phase<a class="headerlink" href="#this-project-is-currently-in-an-experimental-phase" title="Permanent link">🔗</a></h2>
 <h2 id="help">Help<a class="headerlink" href="#help" title="Permanent link">🔗</a></h2>
 <p>See <a href="https://koxudaxi.github.io/poetry-pycharm-plugin/">documentation</a> for more details.</p>
 <h2 id="demo">Demo<a class="headerlink" href="#demo" title="Permanent link">🔗</a></h2>
 <p><img alt="poetry_demo1" src="https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/poetry_demo1.gif" /></p>
+<h2 id="quick-installation">Quick Installation<a class="headerlink" href="#quick-installation" title="Permanent link">🔗</a></h2>
+<p>The plugin is in JetBrains repository (<a href="https://plugins.jetbrains.com/plugin/14307-poetry">Poetry Plugin Page</a>)</p>
+<p>You can install the stable version on PyCharm's <code>Marketplace</code> (Preference -&gt; Plugins -&gt; Marketplace) <a href="https://www.jetbrains.com/help/idea/managing-plugins.html">Official Document</a></p>
+<p><img alt="search plugin" src="https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/search_plugin.png" /></p>
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">🔗</a></h2>
 <h3 id="implemented">Implemented<a class="headerlink" href="#implemented" title="Permanent link">🔗</a></h3>
 <ul>
@@ -519,9 +525,16 @@
 <li>unittest</li>
 <li>document</li>
 </ul>
-<h3 id="complied-binary">Complied binary<a class="headerlink" href="#complied-binary" title="Permanent link">🔗</a></h3>
-<p>The releases section of this repository contains a compiled version of the plugin: <a href="https://github.com/koxudaxi/poetry-pycharm-plugin/releases/latest/download/poetry-pycharm-plugin.zip">poetry-pycharm-plugin.zip(latest)</a></p>
-<p>After downloading this file, you can install the plugin from disk by following <a href="https://www.jetbrains.com/help/pycharm/plugins-settings.html">the JetBrains instructions here</a>.</p>
+<h2 id="feature-restrictions">Feature Restrictions<a class="headerlink" href="#feature-restrictions" title="Permanent link">🔗</a></h2>
+<p>The plugin can't provide some features for technical reasons.</p>
+<p>Because PyCharm has not provided APIs to support third-party python package managers yet. (a.k.a <a href="https://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_extensions.html">extension points</a>) </p>
+<p>We will be able to implement the following features when JetBrains add extension points to PyCharms.</p>
+<ul>
+<li>Create a new environment when creating a new project.</li>
+<li>Use the Custom Icon for poetry.</li>
+<li>Install/uninstall a package from GUI(settings)</li>
+<li>And more.</li>
+</ul>
 <h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">🔗</a></h2>
 <p><a href="https://github.com/python-poetry/poetry">Poetry</a> is a popular package manager of python.</p>
 <p>However, PyCharm doesn't support poetry.</p>
