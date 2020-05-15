@@ -1,9 +1,9 @@
 # Poetry PyCharm Plugin
 ![CI](https://github.com/koxudaxi/poetry-pycharm-plugin/workflows/CI/badge.svg)
-[![codecov](https://codecov.io/gh/koxudaxi/poetry-pycharm-plugin/branch/master/graph/badge.svg)](https://codecov.io/gh/koxudaxi/poetry-pycharm-plugin)
+[![](https://img.shields.io/jetbrains/plugin/v/14307)](https://plugins.jetbrains.com/plugin/14307-poetry)
 ![license](https://img.shields.io/github/license/koxudaxi/poetry-pycharm-plugin.svg)
 
-[A JetBrains PyCharm plugin]() for [`poetry`](https://python-poetry.org/).
+[A JetBrains PyCharm plugin](https://plugins.jetbrains.com/plugin/14307-poetry) for [`poetry`](https://python-poetry.org/).
 
 ## This project is currently in an experimental phase
 
@@ -12,6 +12,14 @@ See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more 
 
 ## Demo
 ![poetry_demo1](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/poetry_demo1.gif)
+
+## Quick Installation
+
+The plugin is in JetBrains repository ([Poetry Plugin Page](https://plugins.jetbrains.com/plugin/14307-poetry))
+
+You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Document](https://www.jetbrains.com/help/idea/managing-plugins.html)
+
+![search plugin](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/search_plugin.png)
 
 ##  Features
 ### Implemented
@@ -29,10 +37,17 @@ See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more 
 - unittest
 - document
 
-### Complied binary
-The releases section of this repository contains a compiled version of the plugin: [poetry-pycharm-plugin.zip(latest)](https://github.com/koxudaxi/poetry-pycharm-plugin/releases/latest/download/poetry-pycharm-plugin.zip)
+## Feature Restrictions  
+The plugin can't provide some features for technical reasons.
 
-After downloading this file, you can install the plugin from disk by following [the JetBrains instructions here](https://www.jetbrains.com/help/pycharm/plugins-settings.html).
+Because PyCharm has not provided APIs to support third-party python package managers yet. (a.k.a [extension points](https://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_extensions.html)) 
+
+We will be able to implement the following features when JetBrains add extension points to PyCharms.
+
+- Create a new environment when creating a new project.
+- Use the Custom Icon for poetry.
+- Install/uninstall a package from GUI(settings)
+- And more.
 
 ## Motivation
 [Poetry](https://github.com/python-poetry/poetry) is a popular package manager of python.
