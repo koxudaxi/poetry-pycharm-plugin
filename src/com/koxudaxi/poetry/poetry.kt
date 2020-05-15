@@ -43,6 +43,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.StandardFileSystems
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.util.PathUtil
 import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
@@ -342,10 +343,13 @@ class PyProjectTomlWatcher : EditorFactoryListener {
         if (project == null || !isPyProjectTomlEditor(event.editor)) return
         val listener = object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                val document = event.document
-                val module = document.virtualFile?.getModule(project) ?: return
-                if (FileDocumentManager.getInstance().isDocumentUnsaved(document)) {
-                    notifyPyProjectTomlChanged(module)
+                try {
+                    val document = event.document
+                    val module = document.virtualFile?.getModule(project) ?: return
+                    if (FileDocumentManager.getInstance().isDocumentUnsaved(document)) {
+                        notifyPyProjectTomlChanged(module)
+                    }
+                } catch (e: AlreadyDisposedException) {
                 }
             }
         }
