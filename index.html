@@ -287,6 +287,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    Motivation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#screen-shots" class="md-nav__link">
     Screen Shots
   </a>
@@ -437,6 +444,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    Motivation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#screen-shots" class="md-nav__link">
     Screen Shots
   </a>
@@ -490,14 +504,16 @@
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">🔗</a></h2>
 <h3 id="implemented">Implemented<a class="headerlink" href="#implemented" title="Permanent link">🔗</a></h3>
 <ul>
-<li>add a interpreter with pyproject.toml</li>
-<li>add a new pyproject.toml when it does not exists</li>
+<li>add/create a poetry environment as Python SDK</li>
+<li>create a new pyproject.toml when it does not exists</li>
 <li>install packages from poetry.lock</li>
 <li>update and lock with a popup</li>
 <li>show a message and a link to fix settings (QuickFix)</li>
 </ul>
 <h2 id="todo">TODO<a class="headerlink" href="#todo" title="Permanent link">🔗</a></h2>
 <ul>
+<li>add actions on context-menu</li>
+<li>add buttons to install on left-side of a editor</li>
 <li>publish this plugin on JetBrains' plugin market </li>
 <li>CI/CD</li>
 <li>unittest</li>
@@ -506,6 +522,14 @@
 <h3 id="complied-binary">Complied binary<a class="headerlink" href="#complied-binary" title="Permanent link">🔗</a></h3>
 <p>The releases section of this repository contains a compiled version of the plugin: <a href="https://github.com/koxudaxi/poetry-pycharm-plugin/releases/latest/download/poetry-pycharm-plugin.zip">poetry-pycharm-plugin.zip(latest)</a></p>
 <p>After downloading this file, you can install the plugin from disk by following <a href="https://www.jetbrains.com/help/pycharm/plugins-settings.html">the JetBrains instructions here</a>.</p>
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">🔗</a></h2>
+<p><a href="https://github.com/python-poetry/poetry">Poetry</a> is a popular package manager of python.</p>
+<p>However, PyCharm doesn't support poetry.</p>
+<p>This plugin support poetry. The code forked from the Pipenv integration code in IntelliJ-community.</p>
+<p>In this issue <a href="https://youtrack.jetbrains.com/issue/PY-30702">PY-30702</a>, the feature is discussing. But, We need time to get the proper functionality in PyCharm.</p>
+<p>The plugin has useful features like installing from poetry.lock.(you can watch demo video)</p>
+<p>However, The feature is limited. PyCharm has to provided extension points for perfect features.</p>
+<p>I guess if the plugin be used a lot of people, then JetBrains developers will implement extension points or poetry integration in PyCharm. </p>
 <h2 id="screen-shots">Screen Shots<a class="headerlink" href="#screen-shots" title="Permanent link">🔗</a></h2>
 <p><img alt="new_sdk" src="https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/new_sdk.png" />
 <img alt="installed_package" src="https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/installed_package.png" />
