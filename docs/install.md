@@ -1,5 +1,12 @@
 # Installation
 
+## MarketPlace 
+The plugin is in JetBrains repository ([Poetry Plugin Page](https://plugins.jetbrains.com/plugin/14307-poetry))
+
+You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Document](https://www.jetbrains.com/help/idea/managing-plugins.html)
+
+![search plugin](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/search_plugin.png)
+
 ## Complied binary
 The releases section of this repository contains a compiled version of the plugin: [poetry-pycharm-plugin.zip(latest)](https://github.com/koxudaxi/poetry-pycharm-plugin/releases/latest/download/poetry-pycharm-plugin.zip)
 

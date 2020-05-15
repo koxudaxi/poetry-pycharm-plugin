@@ -5,13 +5,14 @@
 
 [A JetBrains PyCharm plugin](https://plugins.jetbrains.com/plugin/14307-poetry) for [`poetry`](https://python-poetry.org/).
 
-## This project is currently in an experimental phase
-
-## Help
-See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more details.
-
 ## Demo
 ![poetry_demo1](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/poetry_demo1.gif)
+
+
+## This project is currently in an experimental phase
+*This project was started on 10 May 2020. Now, a very experimental phase.*
+*Therefore, please be careful when using the plugin.*
+*Also, The project needs any feedback and PRs. We're waiting for your feedback and PRs.*
 
 ## Quick Installation
 
@@ -54,7 +55,7 @@ We will be able to implement the following features when JetBrains add extension
 
 However, PyCharm doesn't support poetry.
 
-This plugin support poetry. The code forked from the Pipenv integration code in IntelliJ-community.
+This plugin support poetry. This source code was forked from the Pipenv integration code in IntelliJ-community.
 
 In this issue [PY-30702](https://youtrack.jetbrains.com/issue/PY-30702), the feature is discussing. But, We need time to get the proper functionality in PyCharm.
 
@@ -79,4 +80,6 @@ We are waiting for your contributions to `poetry-pycharm-plugin`.
 
 
 ## Links
+[A JetBrains PyCharm plugin](https://plugins.jetbrains.com/plugin/12861-pydantic) for [`pydantic`](https://github.com/samuelcolvin/pydantic).
+I got interviewed about creating a plugin for [JetBrains' PyCharm Blog](https://blog.jetbrains.com/pycharm/2020/04/interview-koudai-aono-author-of-pydantic-plugin-for-pycharm/).
 
