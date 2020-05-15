@@ -1,16 +1,22 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
-    <h2>version 0.0.4</2>
+    <h2>version 0.0.5</h2>
     <p>Features</p>
     <ul>
         <li>support creating new pyproject.toml [#17] </li>
         <li>check pyproject.toml [#16] </li>
     <ul>
-    <h2>version 0.0.3</2>
+    <h2>version 0.0.4</h2>
+    <p>Features</p>
+    <ul>
+        <li>support creating new pyproject.toml [#17] </li>
+        <li>check pyproject.toml [#16] </li>
+    <ul>
+    <h2>version 0.0.3</h2>
     <p>Features</p>
     <ul>
         <li>add installing from poetry.lock [#10] </li>
@@ -19,7 +25,7 @@
     <ul>
         <li>disable custom icon [#11] </li>
     <ul>
-    <h2>version 0.0.2</2>
+    <h2>version 0.0.2</h2>
     <p>Features</p>
     <ul>
         <li>add quick fix [#9] </li>
@@ -32,15 +38,22 @@
     </ul>
     ]]></change-notes>
     <description><![CDATA[
-    <p>This plugin supports poetry<a href="https://python-poetry.org">poetry</a> which is a package manager for Python</p>
+    <p>This plugin supports <a href="https://python-poetry.org">poetry</a> which is a package manager for Python</p>
     <h2>Help</h2>
     <p>See <a href="https://koxudaxi.github.io/poetry-pycharm-plugin/">documentation</a> for more details.</p>
+    <h3>This project is currently in an experimental phase</h3>
+    <img width="700"  src="https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/poetry_demo1.gif"/>
+
     <h2>Features</h2>
     <h3>Implemented</h3>
-    <li>add a interpreter with pyproject.toml</li>
+    <li>add/create a poetry environment as Python SDK</li>
+    <li>create a new pyproject.toml when it does not exists</li>
+    <li>install packages from poetry.lock</li>
     <li>update and lock with a popup</li>
     <li>show a message and a link to fix settings (QuickFix)</li>
     <h3>TODO</h3>
+    <li>add actions on context-menu</li>
+    <li>add buttons to install on left-side of a editor</li>
     <li>publish this plugin on JetBrains' plugin market</li>
     <li>CI/CD</li>
     <li>unittest</li>
