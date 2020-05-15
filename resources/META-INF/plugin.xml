@@ -8,32 +8,32 @@
     <p>Bug fixes</p>
     <ul>
         <li>fix project already disposed error [#21] </li>
-    <ul>
+    </ul>
     <h2>version 0.0.5</h2>
     <p>Features</p>
-    <ul>
+    </ul>
         <li>update documents [#20] </li>
-    <ul>
+    </ul>
     <h2>version 0.0.4</h2>
     <p>Features</p>
-    <ul>
+    </ul>
         <li>support creating new pyproject.toml [#17] </li>
         <li>check pyproject.toml [#16] </li>
-    <ul>
+    </ul>
     <h2>version 0.0.3</h2>
     <p>Features</p>
     <ul>
         <li>add installing from poetry.lock [#10] </li>
-    <ul>
+    </ul>
     <p>Bug fixes</p>
     <ul>
         <li>disable custom icon [#11] </li>
-    <ul>
+    </ul>
     <h2>version 0.0.2</h2>
     <p>Features</p>
     <ul>
         <li>add quick fix [#9] </li>
-    <ul>
+    </ul>
     <h2>version 0.0.1</h2>
     <p>Features</p>
     <ul>
