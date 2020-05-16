@@ -129,9 +129,7 @@ class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: 
                 notification.expire()
             }
             indicator.text = "$title..."
-            if (myListener != null) {
-                ApplicationManager.getApplication().invokeLater { myListener.started() }
-            }
+            ApplicationManager.getApplication().invokeLater { myListener.started() }
         }
 
         protected fun taskFinished(exceptions: List<ExecutionException?>) {
@@ -143,7 +141,7 @@ class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: 
                 val description = PyPackageManagementService.toErrorDescription(exceptions, mySdk)
                 if (description != null) {
                     val firstLine = "$title: error occurred."
-                    val listener = NotificationListener { notification, event ->
+                    val listener = NotificationListener { _, _ ->
                         assert(myProject != null)
                         val title = StringUtil.capitalizeWords(failureTitle, true)
                         PackagesNotificationPanel.showError(title, description)
@@ -153,7 +151,7 @@ class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: 
                 }
             }
             ApplicationManager.getApplication().invokeLater {
-                myListener?.finished(exceptions)
+                myListener.finished(exceptions)
                 val notification = notificationRef.get()
                 notification?.notify(myProject)
             }
@@ -214,19 +212,19 @@ class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: 
         }
 
         override val successTitle: String
-            protected get() = "Packages installed successfully"
+            get() = "Packages installed successfully"
 
         override val successDescription: String
-            protected get() = if (myRequirements != null) "Installed packages: " + PyPackageUtil.requirementsToString(myRequirements) else "Installed all requirements"
+            get() = if (myRequirements != null) "Installed packages: " + PyPackageUtil.requirementsToString(myRequirements) else "Installed all requirements"
 
         override val failureTitle: String
-            protected get() = "Install packages failed"
+            get() = "Install packages failed"
 
     }
 
-    private class InstallManagementTask internal constructor(project: Project?,
-                                                             sdk: Sdk,
-                                                             listener: PyPackageRequirementsInspection.RunningPackagingTasksListener) : InstallTask(project, sdk, emptyList(), emptyList<String>(), listener) {
+    private open class InstallManagementTask internal constructor(project: Project?,
+                                                                  sdk: Sdk,
+                                                                  listener: PyPackageRequirementsInspection.RunningPackagingTasksListener) : InstallTask(project, sdk, emptyList(), emptyList<String>(), listener) {
         override fun runTask(indicator: ProgressIndicator): List<ExecutionException> {
             val exceptions: MutableList<ExecutionException> = ArrayList()
             val manager = PyPoetryPackageManager(mySdk)
@@ -242,13 +240,13 @@ class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: 
         }
 
         override val successDescription: String
-            protected get() = "Installed Python packaging tools"
+            get() = "Installed Python packaging tools"
     }
 
-    private class UninstallTask internal constructor(project: Project?,
-                                                     sdk: Sdk,
-                                                     listener: PyPackageRequirementsInspection.RunningPackagingTasksListener,
-                                                     private val myPackages: List<PyPackage>) : PackagingTask(project, sdk, "Uninstalling packages", listener) {
+    private open class UninstallTask internal constructor(project: Project?,
+                                                          sdk: Sdk,
+                                                          listener: PyPackageRequirementsInspection.RunningPackagingTasksListener,
+                                                          private val myPackages: List<PyPackage>) : PackagingTask(project, sdk, "Uninstalling packages", listener) {
         override fun runTask(indicator: ProgressIndicator): List<ExecutionException> {
             val manager = PyPoetryPackageManager(mySdk)
             indicator.isIndeterminate = true
@@ -263,16 +261,16 @@ class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: 
         }
 
         override val successTitle: String
-            protected get() = "Packages uninstalled successfully"
+            get() = "Packages uninstalled successfully"
 
         override val successDescription: String
-            protected get() {
+            get() {
                 val packagesString = StringUtil.join(myPackages, { pkg: PyPackage? -> "'" + pkg!!.name + "'" }, ", ")
                 return "Uninstalled packages: $packagesString"
             }
 
         override val failureTitle: String
-            protected get() = "Uninstall packages failed"
+            get() = "Uninstall packages failed"
 
     }
 
