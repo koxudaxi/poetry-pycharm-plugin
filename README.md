@@ -62,7 +62,7 @@ However, PyCharm doesn't support poetry.
 
 This plugin support poetry. This source code was forked from the Pipenv integration code in IntelliJ-community.
 
-In this issue, the feature is discussing. But, We need time to get the proper functionality in PyCharm.
+In this issue [PY-30702](https://youtrack.jetbrains.com/issue/PY-30702), the feature is discussing. But, We need time to get the proper functionality in PyCharm.
 
 The plugin has useful features like installing from poetry.lock.(you can watch demo video)
 
