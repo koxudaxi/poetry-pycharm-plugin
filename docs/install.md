@@ -1,5 +1,7 @@
 # Installation
 
+**The plugin requires PyCharm 2020.1 or later (include other JetBrains IDEs)**
+
 ## MarketPlace 
 The plugin is in JetBrains repository ([Poetry Plugin Page](https://plugins.jetbrains.com/plugin/14307-poetry))
 
