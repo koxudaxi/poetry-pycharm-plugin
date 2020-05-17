@@ -31,6 +31,7 @@ You can install the stable version on PyCharm's `Marketplace` (Preference -> Plu
 - install packages from poetry.lock
 - update and lock with a popup
 - show a message and a link to fix settings (QuickFix)
+- install extras by clicking a line marker ([Toml plugin](https://plugins.jetbrains.com/plugin/8195-toml) is required)
 
 ## TODO 
 - add actions on context-menu
@@ -75,6 +76,7 @@ I guess if the plugin be used a lot of people, then JetBrains developers will im
 ![update_lock](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/update_lock.png)
 ![quick_fix](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/quick_fix.png)
 ![install_from_lock_file](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/install_from_lock_file.png)
+![install_extras](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/extras.png)
 
 
 ## Contribute
