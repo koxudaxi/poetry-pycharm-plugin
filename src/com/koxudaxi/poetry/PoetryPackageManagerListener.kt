@@ -7,11 +7,11 @@ import com.jetbrains.python.sdk.associatedModule
 
 class PoetryPackageManagerListener : PyPackageManager.Listener {
     override fun packagesRefreshed(sdk: Sdk) {
+        val module = sdk.associatedModule ?: return
+        if (!isPoetry(module.project, sdk)) return
         ApplicationManager.getApplication().invokeLater {
-            ApplicationManager.getApplication().executeOnPooledThread {
-                if (sdk.associatedModule?.pyProjectToml == null) return@executeOnPooledThread
-                PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true, notify = false)
-            }
+            if (module.pyProjectToml == null) return@invokeLater
+            PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true, notify = false)
         }
     }
 }
