@@ -346,15 +346,16 @@ class PyProjectTomlWatcher : EditorFactoryListener {
                 try {
                     val document = event.document
                     val module = document.virtualFile?.getModule(project) ?: return
-                    if (!isPoetry(module.project)) {
-                        with(document) {
-                            putUserData(notificationActive, null)
-                            val listener = getUserData(changeListenerKey) ?: return
-                            removeDocumentListener(listener)
-                            putUserData(changeListenerKey, null)
-                            return
-                        }
-                    }
+                      // TODO: Should we remove listener when a sdk is changed to non-poetry sdk?
+//                    if (!isPoetry(module.project)) {
+//                        with(document) {
+//                            putUserData(notificationActive, null)
+//                            val listener = getUserData(changeListenerKey) ?: return
+//                            removeDocumentListener(listener)
+//                            putUserData(changeListenerKey, null)
+//                            return
+//                        }
+//                    }
                     if (FileDocumentManager.getInstance().isDocumentUnsaved(document)) {
                         notifyPyProjectTomlChanged(module)
                     }
