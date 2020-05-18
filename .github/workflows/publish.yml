@@ -72,4 +72,4 @@ jobs:
        run: |
          curl --fail --header "Authorization: Bearer ${{secrets.JETBRAINS_TOKEN}}" \
                -F pluginId=14307 -F file=@build/distributions/poetry-pycharm-plugin.zip \
-                https://plugins.jetbrains.com/plugin/uploadPlugin'
+                https://plugins.jetbrains.com/plugin/uploadPlugin
