@@ -508,7 +508,7 @@ fun runPoetryInBackground(module: Module, args: List<String>, description: Strin
                 PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
                 sdk.associatedModule?.baseDir?.refresh(true, false)
                 if (isPoetry(project)) {
-                    PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true, notify = true)
+                    PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true)
                 }
             }
         }

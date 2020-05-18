@@ -7,6 +7,7 @@
     <h2>version 0.0.7</h2>
     <p>Features</p>
     <ul>
+        <li>Improve handling sdk [#32] </li>
         <li>Support installing extras [#31] </li>
         <li>Update jvm version [#26] </li>
     </ul>

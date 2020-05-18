@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.OrderRootType
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.python.packaging.*
@@ -35,9 +36,6 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     }
 
     override fun installManagement() {}
-    override fun refreshAndGetPackages(alwaysRefresh: Boolean): List<PyPackage> {
-        return refreshAndGetPackages(alwaysRefresh, true)
-    }
 
     override fun hasManagement() = true
 
@@ -89,7 +87,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
 
     fun getRequirements() = requirements
 
-    fun refreshAndGetPackages(alwaysRefresh: Boolean, notify: Boolean): List<PyPackage> {
+    override fun refreshAndGetPackages(alwaysRefresh: Boolean): List<PyPackage> {
         if (alwaysRefresh || packages == null) {
             packages = null
             val output = try {
@@ -101,8 +99,11 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
             val allPackage = parsePoetryInstallDryRun(output)
             packages = allPackage.first
             requirements = allPackage.second
+            val notify = sdk.associatedModule?.getUserData(refreshAndGetPackagesNotificationActive) ?: true
             if (notify) {
                 ApplicationManager.getApplication().messageBus.syncPublisher(PACKAGE_MANAGER_TOPIC).packagesRefreshed(sdk)
+            } else {
+                sdk.associatedModule?.putUserData(refreshAndGetPackagesNotificationActive, null)
             }
         }
         return packages ?: emptyList()
@@ -128,6 +129,8 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         fun getInstance(sdk: Sdk): PyPoetryPackageManager {
             return PyPoetryPackageManagers.getInstance().forSdk(sdk)
         }
+        val refreshAndGetPackagesNotificationActive = Key.create<Boolean>("PyPoetryPackageManagerRefreshAndGetPackages.notification.active")
+
     }
 
     private fun getVersion(version: String): String {
