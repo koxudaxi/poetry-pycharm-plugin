@@ -88,22 +88,23 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     fun getRequirements() = requirements
 
     override fun refreshAndGetPackages(alwaysRefresh: Boolean): List<PyPackage> {
+        return refreshAndGetPackages(alwaysRefresh, true)
+    }
+
+    fun refreshAndGetPackages(alwaysRefresh: Boolean, notify: Boolean): List<PyPackage> {
         if (alwaysRefresh || packages == null) {
             packages = null
             val output = try {
                 runPoetry(sdk, "install", "--dry-run")
             } catch (e: ExecutionException) {
                 packages = emptyList()
-                throw e
+                return packages ?: emptyList()
             }
             val allPackage = parsePoetryInstallDryRun(output)
             packages = allPackage.first
             requirements = allPackage.second
-            val notify = sdk.associatedModule?.getUserData(refreshAndGetPackagesNotificationActive) ?: true
             if (notify) {
                 ApplicationManager.getApplication().messageBus.syncPublisher(PACKAGE_MANAGER_TOPIC).packagesRefreshed(sdk)
-            } else {
-                sdk.associatedModule?.putUserData(refreshAndGetPackagesNotificationActive, null)
             }
         }
         return packages ?: emptyList()
@@ -129,8 +130,6 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         fun getInstance(sdk: Sdk): PyPoetryPackageManager {
             return PyPoetryPackageManagers.getInstance().forSdk(sdk)
         }
-        val refreshAndGetPackagesNotificationActive = Key.create<Boolean>("PyPoetryPackageManagerRefreshAndGetPackages.notification.active")
-
     }
 
     private fun getVersion(version: String): String {
