@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.OrderRootType
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.python.packaging.*
@@ -35,9 +36,6 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     }
 
     override fun installManagement() {}
-    override fun refreshAndGetPackages(alwaysRefresh: Boolean): List<PyPackage> {
-        return refreshAndGetPackages(alwaysRefresh, true)
-    }
 
     override fun hasManagement() = true
 
@@ -89,6 +87,10 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
 
     fun getRequirements() = requirements
 
+    override fun refreshAndGetPackages(alwaysRefresh: Boolean): List<PyPackage> {
+        return refreshAndGetPackages(alwaysRefresh, true)
+    }
+
     fun refreshAndGetPackages(alwaysRefresh: Boolean, notify: Boolean): List<PyPackage> {
         if (alwaysRefresh || packages == null) {
             packages = null
@@ -96,7 +98,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
                 runPoetry(sdk, "install", "--dry-run")
             } catch (e: ExecutionException) {
                 packages = emptyList()
-                throw e
+                return packages ?: emptyList()
             }
             val allPackage = parsePoetryInstallDryRun(output)
             packages = allPackage.first
