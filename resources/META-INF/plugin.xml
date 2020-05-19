@@ -98,7 +98,6 @@
     <actions>
         <action id="poetryInstallExtras" class="com.koxudaxi.poetry.PoetryInstallExtras" text="Install Packages"
                 description="Poetry install extras packages">
-            <add-to-group group-id="$LRU" anchor="first"/>
         </action>
     </actions>
 </idea-plugin>
