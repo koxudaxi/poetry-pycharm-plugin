@@ -48,13 +48,15 @@ class PoetryInterpreterInspection : PyInspection() {
                 fixes.add(UsePoetryQuickFix(sdk, module))
             }
 
-            if (sdk == null && fixes.isNotEmpty()) {
-                // TODO change message
-                registerProblem(node, "Found pyproject.toml in this project", *fixes.toArray(LocalQuickFix.EMPTY_ARRAY))
+            if (sdk == null) {
+                if (fixes.isNotEmpty()) {
+                    // TODO change message
+                    registerProblem(node, "Found pyproject.toml in this project", *fixes.toArray(LocalQuickFix.EMPTY_ARRAY))
+                }
             } else {
-                val associatedModule = sdk?.associatedModule
-                val associatedName = associatedModule?.name ?: sdk?.associatedModulePath
-                if (isPoetry(module.project) && associatedModule !== module) {
+                val associatedModule = sdk.associatedModule
+                val associatedName = associatedModule?.name ?: sdk.associatedModulePath
+                if (isPoetry(module.project, sdk) && associatedModule !== module) {
                     val message = if (associatedName == null) {
                         "Poetry interpreter is not associated with any $interpreterOwner"
                     } else {
