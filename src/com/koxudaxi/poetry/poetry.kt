@@ -49,7 +49,6 @@ import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.statistics.modules
-import com.jetbrains.rd.util.catch
 import icons.PythonIcons
 import org.apache.tuweni.toml.Toml
 import org.apache.tuweni.toml.TomlInvalidTypeException
@@ -161,6 +160,12 @@ fun setupPoetrySdkUnderProgress(project: Project?,
     return createSdkByGenerateTask(task, existingSdks, null, projectPath, suggestedName)?.apply {
         associateWithModule(module ?: project?.modules?.firstOrNull(), newProjectPath)
         project?.let { project ->
+            existingSdks.find {
+                it.associatedModulePath == projectPath && isPoetry(project, it) && it.homePath == homePath
+            }?.run {
+                // re-use existing invalid sdk
+                return null
+            }
             PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(homePath!!)
         }
     }
@@ -346,7 +351,7 @@ class PyProjectTomlWatcher : EditorFactoryListener {
                 try {
                     val document = event.document
                     val module = document.virtualFile?.getModule(project) ?: return
-                      // TODO: Should we remove listener when a sdk is changed to non-poetry sdk?
+                    // TODO: Should we remove listener when a sdk is changed to non-poetry sdk?
 //                    if (!isPoetry(module.project)) {
 //                        with(document) {
 //                            putUserData(notificationActive, null)
