@@ -5,14 +5,13 @@ import com.intellij.icons.AllIcons.Actions.Install
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.sdk.pythonSdk
-import org.jetbrains.kotlin.idea.util.module
 import org.toml.lang.psi.TomlKey
 import org.toml.lang.psi.TomlKeyValue
 import org.toml.lang.psi.TomlTable
 
 object PoetryExtrasLineMarkerContributor : RunLineMarkerContributor() {
     override fun getInfo(element: PsiElement): Info? {
-        val sdk = element.module?.pythonSdk ?: return null
+        val sdk = element.project.pythonSdk ?: return null
         if (!isPoetry(element.project, sdk)) return null
         if (element !is TomlKey) return null
         val keyValue = element.parent as? TomlKeyValue ?: return null
