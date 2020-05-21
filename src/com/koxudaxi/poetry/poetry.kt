@@ -56,7 +56,6 @@ import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
-import org.jetbrains.kotlin.idea.util.projectStructure.sdk
 import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
 
@@ -388,8 +387,6 @@ class PyProjectTomlWatcher : EditorFactoryListener {
         val title = "$POETRY_LOCK is $what"
         val content = "Run <a href='#lock'>poetry lock</a> or <a href='#update'>poetry update</a>"
         val notification = LOCK_NOTIFICATION_GROUP.createNotification(title = title, content = content, listener = NotificationListener { notification, event ->
-            notification.expire()
-            module.putUserData(notificationActive, null)
             FileDocumentManager.getInstance().saveAllDocuments()
             when (event.description) {
                 "#lock" ->
@@ -397,6 +394,8 @@ class PyProjectTomlWatcher : EditorFactoryListener {
                 "#update" ->
                     runPoetryInBackground(module, listOf("update"), "Updating Poetry environment")
             }
+            notification.expire()
+            module.putUserData(notificationActive, null)
         })
         module.putUserData(notificationActive, true)
         notification.whenExpired {
