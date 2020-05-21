@@ -49,7 +49,6 @@ import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.statistics.modules
-import com.jetbrains.rd.util.catch
 import icons.PythonIcons
 import org.apache.tuweni.toml.Toml
 import org.apache.tuweni.toml.TomlInvalidTypeException
@@ -57,6 +56,7 @@ import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
+import org.jetbrains.kotlin.idea.util.projectStructure.sdk
 import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
 
@@ -161,6 +161,12 @@ fun setupPoetrySdkUnderProgress(project: Project?,
     return createSdkByGenerateTask(task, existingSdks, null, projectPath, suggestedName)?.apply {
         associateWithModule(module ?: project?.modules?.firstOrNull(), newProjectPath)
         project?.let { project ->
+            existingSdks.find {
+                it.associatedModulePath == projectPath && isPoetry(project, it) && it.homePath == homePath
+            }?.run {
+                // re-use existing invalid sdk
+                return null
+            }
             PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(homePath!!)
         }
     }
@@ -187,9 +193,8 @@ fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPa
 }
 
 
-fun isPoetry(project: Project, sdk: Sdk? = null): Boolean {
-    return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains(sdk?.homePath
-            ?: project.pythonSdk?.homePath)
+fun isPoetry(project: Project, sdk: Sdk): Boolean {
+    return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains(sdk.homePath)
 }
 
 /**
@@ -279,7 +284,7 @@ class UsePoetryQuickFix(sdk: Sdk?, module: Module) : LocalQuickFix {
             // XXX: Should we show an error message on exceptions and on null?
             val newSdk = setupPoetrySdkUnderProgress(project, module, existingSdks, null, null, false)
                     ?: return
-            val existingSdk = existingSdks.find { isPoetry(project) && it.homePath == newSdk.homePath }
+            val existingSdk = existingSdks.find { isPoetry(project, it) && it.homePath == newSdk.homePath }
             val sdk = existingSdk ?: newSdk
             if (sdk == newSdk) {
                 SdkConfigurationUtil.addSdk(newSdk)
@@ -313,7 +318,7 @@ class PoetryInstallQuickFix : LocalQuickFix {
     companion object {
         fun poetryInstall(project: Project, module: Module) {
             val sdk = module.pythonSdk ?: return
-            if (!isPoetry(project)) return
+            if (!isPoetry(project, sdk)) return
             // TODO: create UI
             val listener = PyPackageRequirementsInspection.RunningPackagingTasksListener(module)
             val ui = PoetryPackageManagerUI(project, sdk, listener)
@@ -346,7 +351,7 @@ class PyProjectTomlWatcher : EditorFactoryListener {
                 try {
                     val document = event.document
                     val module = document.virtualFile?.getModule(project) ?: return
-                      // TODO: Should we remove listener when a sdk is changed to non-poetry sdk?
+                    // TODO: Should we remove listener when a sdk is changed to non-poetry sdk?
 //                    if (!isPoetry(module.project)) {
 //                        with(document) {
 //                            putUserData(notificationActive, null)
@@ -405,7 +410,8 @@ class PyProjectTomlWatcher : EditorFactoryListener {
         if (file.name != PY_PROJECT_TOML) return false
         val project = editor.project ?: return false
         val module = file.getModule(project) ?: return false
-        if (!isPoetry(project)) return false
+        val sdk = module.pythonSdk ?: return false
+        if (!isPoetry(project, sdk)) return false
         return module.pyProjectToml == file
     }
 }
@@ -507,7 +513,7 @@ fun runPoetryInBackground(module: Module, args: List<String>, description: Strin
             } finally {
                 PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
                 sdk.associatedModule?.baseDir?.refresh(true, false)
-                if (isPoetry(project)) {
+                if (isPoetry(project, sdk)) {
                     PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true)
                 }
             }

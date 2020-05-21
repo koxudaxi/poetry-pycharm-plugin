@@ -28,7 +28,6 @@ import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.event.ItemEvent
 import java.io.File
-import java.lang.NullPointerException
 import java.nio.file.Files
 import javax.swing.Icon
 import javax.swing.JComboBox
@@ -61,10 +60,12 @@ class PyAddPoetryPanel(private val project: Project?,
 
     init {
         addInterpretersAsync(baseSdkField) {
-            findBaseSdks(existingSdks, module, context).takeIf { it.isNotEmpty() }
+            val sdks = findBaseSdks(existingSdks, module, context).takeIf { it.isNotEmpty() }
                     ?: detectSystemWideSdks(module, existingSdks, context)
+            sdks.filterNot { PythonSdkUtil.isInvalid(it) || project?.let { project -> isPoetry(project, it) } == true }
         }
     }
+
 
     private val installPackagesCheckBox = JBCheckBox("Install packages from pyproject.toml").apply {
         isVisible = projectPath?.let { StandardFileSystems.local().findFileByPath(it)?.findChild(PY_PROJECT_TOML)?.let { file -> getPyProjectTomlForPoetry(file) } } != null
@@ -176,11 +177,14 @@ class PyAddPoetryPanel(private val project: Project?,
      */
     private fun validatePoetryIsNotAdded(): ValidationInfo? {
         val path = projectPath ?: return null
+        val project = project ?: return null
         val addedPoetry = existingSdks.find {
-            it.associatedModulePath == path && project?.let { project -> isPoetry(project) } == true
+            it.associatedModulePath == path && isPoetry(project, it)
         } ?: return null
+        if (addedPoetry.homeDirectory == null) return null
         return ValidationInfo("Poetery interpreter has been already added, select '${addedPoetry.name}'")
     }
+
 
     /**
      * The effective project path for the new project or for the existing project.

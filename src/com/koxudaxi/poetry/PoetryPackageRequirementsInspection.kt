@@ -125,7 +125,7 @@ class PoetryPackageRequirementsInspection : PyInspection() {
                 // TODO: Fix this logic
 //                val sdk = PythonSdkUtil.findPythonSdk(module)
                 val sdk = module.project.pythonSdk ?: return
-                if (!isPoetry(file.project)) return
+                if (!isPoetry(file.project, sdk)) return
                 if (sdk.associatedModule?.pyProjectToml == null) return
                 val unsatisfied: List<PyRequirement> = findUnsatisfiedRequirements(module, sdk, myIgnoredPackages)
                  if (unsatisfied.isNotEmpty()) {
@@ -135,7 +135,7 @@ class PoetryPackageRequirementsInspection : PyInspection() {
                             PyPackageUtil.requirementsToString(unsatisfied),
                             if (plural) "are" else "is")
                     val quickFixes: MutableList<LocalQuickFix> = ArrayList()
-                    if (isPoetry(module.project)) {
+                    if (isPoetry(module.project,sdk)) {
                         quickFixes.add(PoetryInstallQuickFix())
                         registerProblem(file, msg,
                                 ProblemHighlightType.GENERIC_ERROR_OR_WARNING, null,
