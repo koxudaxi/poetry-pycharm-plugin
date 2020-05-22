@@ -7,6 +7,7 @@
     <h2>version 0.0.8</h2>
     <p>Features</p>
     <ul>
+        <li>improve detecting extras [#39] </li>
         <li>improve showing popup [#38] </li>
         <li>improve handling invalid interpreter [#37] </li>
     </ul>
