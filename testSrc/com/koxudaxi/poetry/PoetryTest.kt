@@ -20,5 +20,10 @@ class PoetryTest : PoetryTestCase() {
         assertEquals(result.first, 0)
         assertEquals(result.second, null)
     }
-
+    fun testGetPyProjectTomlForPoetryBroken() {
+        val testFile = LocalFileSystemImpl.getInstance().findFileByPath(dataDir + File.separator + "pyproject.toml")
+        val result = getPyProjectTomlForPoetry(testFile!!)
+        assertEquals(result.first, 0)
+        assertEquals(result.second, null)
+    }
 }
