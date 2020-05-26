@@ -148,7 +148,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     /**
      * Parses the output of `poetry install --dry-run ` into a list of packages.
      */
-    private fun parsePoetryInstallDryRun(input: String): Pair<List<PyPackage>, List<PyRequirement>> {
+    fun parsePoetryInstallDryRun(input: String): Pair<List<PyPackage>, List<PyRequirement>> {
         fun getNameAndVersion(line: String): Pair<String, String> {
             return line.split(" ").let {
                 Pair(it[4], it[5].replace(Regex("[()]"), ""))
@@ -159,7 +159,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         val pyRequirements = mutableListOf<PyRequirement>()
         input
                 .lineSequence()
-                .filter { it.endsWith(")") }
+                .filter { it.endsWith(")") || it.endsWith("Already installed") }
                 .forEach { line ->
                     getNameAndVersion(line).also {
                         when {
