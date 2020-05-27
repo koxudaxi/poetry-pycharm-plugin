@@ -1,0 +1,9 @@
+Installing dependencies from lock file
+
+
+Package operations: 3 installs, 0 updates, 0 removals, 1 skipped
+
+  - Installing mypy-extensions (0.4.3)
+  - Skipping typed-ast (1.4.1) Already installed
+  - Installing typing-extensions (3.7.4.2)
+  - Installing mypy (0.770)

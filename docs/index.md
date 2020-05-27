@@ -35,10 +35,6 @@ You can install the stable version on PyCharm's `Marketplace` (Preference -> Plu
 
 ## TODO 
 - add actions on context-menu
-- add buttons to install on left-side of a editor
-- publish this plugin on JetBrains' plugin market 
-- CI/CD
-- unittest
 - document
 
 ## Feature Restrictions  

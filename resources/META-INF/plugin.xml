@@ -5,6 +5,10 @@
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
     <h2>version 0.0.9</h2>
+    <p>Features</p>
+    <ul>
+        <li>Add unittest [#41] </li>
+    </ul>
     <p>Bug fixes</p>
     <ul>
         <li>Fix an error not found toml plugin [#42] </li>
@@ -81,10 +85,6 @@
     <li>install extras by clicking a line marker (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
     <h3>TODO</h3>
     <li>add actions on context-menu</li>
-    <li>add buttons to install on left-side of a editor</li>
-    <li>publish this plugin on JetBrains' plugin market</li>
-    <li>CI/CD</li>
-    <li>unittest</li>
     <li>document</li>
     ]]></description>
 
