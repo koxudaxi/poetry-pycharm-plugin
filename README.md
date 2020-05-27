@@ -1,6 +1,7 @@
 # Poetry PyCharm Plugin
 ![CI](https://github.com/koxudaxi/poetry-pycharm-plugin/workflows/CI/badge.svg)
 [![](https://img.shields.io/jetbrains/plugin/v/14307)](https://plugins.jetbrains.com/plugin/14307-poetry)
+![JetBrains IntelliJ Plugins](https://img.shields.io/jetbrains/plugin/r/rating/14307-poetry)
 ![license](https://img.shields.io/github/license/koxudaxi/poetry-pycharm-plugin.svg)
 
 [A JetBrains PyCharm plugin](https://plugins.jetbrains.com/plugin/14307-poetry) for [`poetry`](https://python-poetry.org/).
