@@ -20,13 +20,6 @@
         <li>improve showing popup [#38] </li>
         <li>improve handling invalid interpreter [#37] </li>
     </ul>
-
-    <p>Features</p>
-    <ul>
-        <li>improve detecting extras [#39] </li>
-        <li>improve showing popup [#38] </li>
-        <li>improve handling invalid interpreter [#37] </li>
-    </ul>
     <p>Bug fixes</p>
     <ul>
         <li>Remove a invalid content in Open Project menu [#35] </li>
