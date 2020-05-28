@@ -6,7 +6,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.OrderRootType
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.python.packaging.*
@@ -44,10 +43,17 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     }
 
     override fun install(requirements: List<PyRequirement>?, extraArgs: List<String>) {
-        val args = listOfNotNull(listOf("install"),
-                requirements?.flatMap { it.installOptions },
-                extraArgs)
-                .flatten()
+        val args = if (requirements == null || requirements.isEmpty()) {
+            listOfNotNull(listOf("install"),
+                    extraArgs)
+                    .flatten()
+        } else {
+            listOfNotNull(listOf("add"),
+                    requirements.map { it.name },
+                    extraArgs)
+                    .flatten()
+        }
+
         try {
             runPoetry(sdk, *args.toTypedArray())
         } finally {

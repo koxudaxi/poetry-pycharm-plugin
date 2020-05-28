@@ -1,4 +1,4 @@
-package com.jetbrains.inspections.unresolvedReference;
+package com.koxudaxi.poetry;
 
 import com.intellij.codeInspection.LocalInspectionToolSession;
 import com.intellij.codeInspection.LocalQuickFix;
@@ -19,14 +19,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SimplePyUnresolvedReferencesInspection extends PyInspection {
+/**
+ *  This source code is edited by @koxudaxi  (Koudai Aono)
+ */
+
+
+public class SimplePoetryUnresolvedReferencesInspection extends PyInspection {
   @NotNull
   @Override
   public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder,
                                         boolean isOnTheFly,
                                         @NotNull LocalInspectionToolSession session) {
     Visitor visitor = new Visitor(holder, session);
-    session.putUserData(PyUnresolvedReferencesVisitor.INSPECTION, this);
+    session.putUserData(PoetryUnresolvedReferencesVisitor.INSPECTION, this);
     return visitor;
   }
 
@@ -36,7 +41,7 @@ public class SimplePyUnresolvedReferencesInspection extends PyInspection {
     return "";
   }
 
-  public static class Visitor extends PyUnresolvedReferencesVisitor {
+  public static class Visitor extends PoetryUnresolvedReferencesVisitor {
     public Visitor(@Nullable ProblemsHolder holder,
             @NotNull LocalInspectionToolSession session) {
       super(holder, session, Collections.emptyList());

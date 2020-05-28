@@ -1,5 +1,5 @@
 // Copyright 2000-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
-package com.jetbrains.inspections.unresolvedReference;
+package com.koxudaxi.poetry;
 
 import com.google.common.collect.Sets;
 import com.intellij.codeInspection.*;
@@ -20,12 +20,9 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.QualifiedName;
 import com.intellij.util.PlatformUtils;
 import com.jetbrains.python.PyNames;
-import com.jetbrains.python.PyPsiBundle;
 import com.jetbrains.python.PyPsiPackageUtil;
 import com.jetbrains.python.PythonRuntimeService;
 import com.jetbrains.python.codeInsight.PyCodeInsightSettings;
-import com.jetbrains.python.codeInsight.dataflow.scope.ScopeUtil;
-import com.jetbrains.python.codeInsight.imports.AutoImportHintAction;
 import com.jetbrains.python.codeInsight.imports.AutoImportQuickFix;
 import com.jetbrains.python.codeInsight.imports.OptimizeImportsQuickFix;
 import com.jetbrains.python.codeInsight.imports.PythonImportUtils;
@@ -35,7 +32,6 @@ import com.jetbrains.python.inspections.PyPackageRequirementsInspection;
 import com.jetbrains.python.inspections.PyUnresolvedReferenceQuickFixProvider;
 import com.jetbrains.python.inspections.quickfix.*;
 import com.jetbrains.python.inspections.unresolvedReference.PyPackageAliasesProvider;
-import com.jetbrains.python.inspections.unresolvedReference.PyUnresolvedReferencesVisitor;
 import com.jetbrains.python.packaging.PyPIPackageUtil;
 import com.jetbrains.python.packaging.PyPackageUtil;
 import com.jetbrains.python.packaging.PyRequirement;
@@ -59,16 +55,21 @@ import java.util.*;
  * Marks references that fail to resolve. Also tracks unused imports and provides "optimize imports" support.
  * User: dcheryasov
  */
-public class PyUnresolvedReferencesInspection extends PyInspection {
-  private static final Key<Visitor> KEY = Key.create("PyUnresolvedReferencesInspection.Visitor");
-  public static final Key<PyUnresolvedReferencesInspection> SHORT_NAME_KEY =
-    Key.create(PyUnresolvedReferencesInspection.class.getSimpleName());
+
+/**
+ *  This source code is edited by @koxudaxi  (Koudai Aono)
+ */
+
+public class PoetryUnresolvedReferencesInspection extends PyInspection {
+  private static final Key<Visitor> KEY = Key.create("PoetryUnresolvedReferencesInspection.Visitor");
+  public static final Key<PoetryUnresolvedReferencesInspection> SHORT_NAME_KEY =
+    Key.create(PoetryUnresolvedReferencesInspection.class.getSimpleName());
 
   public List<String> ignoredIdentifiers = new ArrayList<>();
 
-  public static PyUnresolvedReferencesInspection getInstance(PsiElement element) {
+  public static PoetryUnresolvedReferencesInspection getInstance(PsiElement element) {
     final InspectionProfile inspectionProfile = InspectionProjectProfileManager.getInstance(element.getProject()).getCurrentProfile();
-    return (PyUnresolvedReferencesInspection)inspectionProfile.getUnwrappedTool(SHORT_NAME_KEY.toString(), element);
+    return (PoetryUnresolvedReferencesInspection)inspectionProfile.getUnwrappedTool(SHORT_NAME_KEY.toString(), element);
   }
 
   @NotNull
@@ -82,7 +83,7 @@ public class PyUnresolvedReferencesInspection extends PyInspection {
     if (existingVisitor == null) {
       session.putUserData(KEY, visitor);
     }
-    session.putUserData(PyUnresolvedReferencesVisitor.INSPECTION, this);
+    session.putUserData(PoetryUnresolvedReferencesVisitor.INSPECTION, this);
     return visitor;
   }
 
@@ -103,7 +104,7 @@ public class PyUnresolvedReferencesInspection extends PyInspection {
     return form.getContentPanel();
   }
 
-  public static class Visitor extends PyUnresolvedReferencesVisitor {
+  public static class Visitor extends PoetryUnresolvedReferencesVisitor {
     private volatile Boolean myIsEnabled = null;
 
     public Visitor(@Nullable ProblemsHolder holder, @NotNull LocalInspectionToolSession session, List<String> ignoredIdentifiers) {
@@ -148,7 +149,7 @@ public class PyUnresolvedReferencesInspection extends PyInspection {
         }
         if (element.getTextLength() > 0) {
           OptimizeImportsQuickFix fix = new OptimizeImportsQuickFix();
-          registerProblem(element, PyPsiBundle.message("INSP.unused.import.statement"), ProblemHighlightType.LIKE_UNUSED_SYMBOL, null, fix);
+          registerProblem(element, PoetryPsiBundle.message("INSP.unused.import.statement"), ProblemHighlightType.LIKE_UNUSED_SYMBOL, null, fix);
         }
       }
     }
@@ -166,7 +167,7 @@ public class PyUnresolvedReferencesInspection extends PyInspection {
         final PyTargetExpression asElement = importElement.getAsNameElement();
         final PyElement toHighlight = asElement != null ? asElement : importElement.getImportReferenceExpression();
         registerProblem(toHighlight,
-                        PyPsiBundle.message("INSP.try.except.import.error",
+                        PoetryPsiBundle.message("INSP.try.except.import.error",
                                             importElement.getVisibleName()),
                         ProblemHighlightType.LIKE_UNKNOWN_SYMBOL);
       }
@@ -344,18 +345,20 @@ public class PyUnresolvedReferencesInspection extends PyInspection {
         return Collections.emptyList();
       }
       List<LocalQuickFix> result = new ArrayList<>();
-      AutoImportQuickFix importFix = PythonImportUtils.proposeImportFix(node, reference);
+//      AutoImportQuickFix importFix = PythonImportUtils.proposeImportFix(node, reference);
+      AutoImportQuickFix importFix = null;
       if (importFix != null) {
-        if (!suppressHintForAutoImport(node, importFix) && PyCodeInsightSettings.getInstance().SHOW_IMPORT_POPUP) {
-          final AutoImportHintAction autoImportHintAction = new AutoImportHintAction(importFix);
-          result.add(autoImportHintAction);
-        }
-        else {
-          result.add(importFix);
-        }
-        if (ScopeUtil.getScopeOwner(node) instanceof PyFunction) {
-          result.add(importFix.forLocalImport());
-        }
+        return new ArrayList<>();
+//        if (!suppressHintForAutoImport(node, importFix) && PyCodeInsightSettings.getInstance().SHOW_IMPORT_POPUP) {
+//          final AutoImportHintAction autoImportHintAction = new AutoImportHintAction(importFix);
+//          result.add(autoImportHintAction);
+//        }
+//        else {
+//          result.add(importFix);
+//        }
+//        if (ScopeUtil.getScopeOwner(node) instanceof PyFunction) {
+//          result.add(importFix.forLocalImport());
+//        }
       }
       else {
         final String refName = (node instanceof PyQualifiedExpression) ? ((PyQualifiedExpression)node).getReferencedName() : node.getText();
@@ -366,12 +369,12 @@ public class PyUnresolvedReferencesInspection extends PyInspection {
           final String packageName = components.get(0);
           final Module module = ModuleUtilCore.findModuleForPsiElement(node);
           if (PyPIPackageUtil.INSTANCE.isInPyPI(packageName) && PythonSdkUtil.findPythonSdk(module) != null) {
-            result.add(new PyPackageRequirementsInspection.InstallAndImportQuickFix(packageName, packageName, node));
+            result.add(new PoetryPackageRequirementsInspection.InstallAndImportQuickFix(packageName, packageName, node));
           }
           else {
             final String packageAlias = PyPackageAliasesProvider.commonImportAliases.get(packageName);
             if (packageAlias != null && PyPIPackageUtil.INSTANCE.isInPyPI(packageName) && PythonSdkUtil.findPythonSdk(module) != null) {
-              result.add(new PyPackageRequirementsInspection.InstallAndImportQuickFix(packageAlias, packageName, node));
+              result.add(new PoetryPackageRequirementsInspection.InstallAndImportQuickFix(packageAlias, packageName, node));
             }
           }
         }
@@ -424,13 +427,13 @@ public class PyUnresolvedReferencesInspection extends PyInspection {
       return callExpression != null && node == callExpression.getCallee();
     }
 
-    @Override
-    public Iterable<LocalQuickFix> getPluginQuickFixes(PsiReference reference) {
-      List<LocalQuickFix> result = new ArrayList<>();
-      for (PyUnresolvedReferenceQuickFixProvider provider : PyUnresolvedReferenceQuickFixProvider.EP_NAME.getExtensionList()) {
-        provider.registerQuickFixes(reference, result::add);
-      }
-      return result;
-    }
+//    @Override
+//    public Iterable<LocalQuickFix> getPluginQuickFixes(PsiReference reference) {
+//      List<LocalQuickFix> result = new ArrayList<>();
+//      for (PyUnresolvedReferenceQuickFixProvider provider : PyUnresolvedReferenceQuickFixProvider.EP_NAME.getExtensionList()) {
+//        provider.registerQuickFixes(reference, result::add);
+//      }
+//      return result;
+//    }
   }
 }
