@@ -403,7 +403,7 @@ public abstract class PoetryUnresolvedReferencesVisitor extends PyInspectionVisi
 //    ContainerUtil.addAll(fixes, getImportStatementQuickFixes(element));
 //    ContainerUtil.addAll(fixes, getAddIgnoredIdentifierQuickFixes(qualifiedNames));
 //    ContainerUtil.addAll(fixes, getPluginQuickFixes(reference));
-//    ContainerUtil.addAll(fixes, getInstallPackageQuickFixes(node, reference, refName));
+    ContainerUtil.addAll(fixes, getInstallPackageQuickFixes(node, reference, refName));
 
     if (reference instanceof PySubstitutionChunkReference) {
       return;

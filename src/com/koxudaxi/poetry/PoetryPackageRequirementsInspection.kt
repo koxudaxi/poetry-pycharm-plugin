@@ -28,8 +28,10 @@ import com.jetbrains.python.codeInsight.imports.AddImportHelper
 import com.jetbrains.python.inspections.PyInspection
 import com.jetbrains.python.inspections.PyInspectionVisitor
 import com.jetbrains.python.inspections.PyInterpreterInspection
+import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.inspections.PyPackageRequirementsInspection.RunningPackagingTasksListener
 import com.jetbrains.python.packaging.*
+import com.jetbrains.python.packaging.ui.PyChooseRequirementsDialog
 import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.psi.PyUtil
@@ -134,14 +136,14 @@ class PoetryPackageRequirementsInspection : PyInspection() {
                 if (!isPoetry(file.project, sdk)) return
                 if (sdk.associatedModule?.pyProjectToml == null) return
                 val unsatisfied: List<PyRequirement> = findUnsatisfiedRequirements(module, sdk, myIgnoredPackages)
-                 if (unsatisfied.isNotEmpty()) {
+                if (unsatisfied.isNotEmpty()) {
                     val plural = unsatisfied.size > 1
                     val msg = String.format("Package requirement%s %s %s not satisfied",
                             if (plural) "s" else "",
                             PyPackageUtil.requirementsToString(unsatisfied),
                             if (plural) "are" else "is")
                     val quickFixes: MutableList<LocalQuickFix> = ArrayList()
-                    if (isPoetry(module.project,sdk)) {
+                    if (isPoetry(module.project, sdk)) {
                         quickFixes.add(PoetryInstallQuickFix())
                         registerProblem(file, msg,
                                 ProblemHighlightType.GENERIC_ERROR_OR_WARNING, null,
@@ -151,18 +153,69 @@ class PoetryPackageRequirementsInspection : PyInspection() {
             }
         }
     }
+
+    companion object {
+        private fun getDevName(name: String): String {
+            return "$name as dev"
+        }
+        // This Hack change order on a quick fix menu.
+        private const val firstChar = 0.toChar().toString()
+        private fun checkAdminPermissionsAndConfigureInterpreter(project: Project,
+                                                                 descriptor: ProblemDescriptor,
+                                                                 sdk: Sdk): Boolean {
+            if (!PythonSdkUtil.isRemote(sdk) && sdk.adminPermissionsNeeded()) {
+                val answer = askToConfigureInterpreter(project, sdk)
+                when (answer) {
+                    Messages.YES -> {
+                        PyInterpreterInspection.ConfigureInterpreterFix().applyFix(project, descriptor)
+                        return true
+                    }
+                    Messages.CANCEL, -1 -> return true
+                }
+            }
+            return false
+        }
+
+
+        private fun askToConfigureInterpreter(project: Project, sdk: Sdk): Int {
+            val sdkName = StringUtil.shortenTextWithEllipsis(sdk.name, 25, 0)
+            val text = PoetryPsiBundle.message("INSP.package.requirements.administrator.privileges.required.description", sdkName)
+            val options = arrayOf(
+                    PoetryPsiBundle.message("INSP.package.requirements.administrator.privileges.required.button.configure"),
+                    PoetryPsiBundle.message("INSP.package.requirements.administrator.privileges.required.button.install.anyway"),
+                    CoreBundle.message("button.cancel")
+            )
+            return Messages.showIdeaMessageDialog(
+                    project,
+                    text,
+                    PoetryPsiBundle.message("INSP.package.requirements.administrator.privileges.required"),
+                    options,
+                    0,
+                    Messages.getWarningIcon(),
+                    null)
+        }
+
+    }
+
     class InstallAndImportQuickFix(private val myPackageName: String,
                                    private val myAsName: String?,
-                                   node: PyElement) : LocalQuickFix {
+                                   node: PyElement,
+                                   dev: Boolean = false
+    ) : LocalQuickFix {
         private val mySdk: Sdk?
         private val myModule: Module?
         private val myNode: SmartPsiElementPointer<PyElement>
+        private val myExtraArgs: List<String>
+        private val myDev: Boolean
+
         override fun getName(): @Nls String {
-            return  0.toChar().toString()  + PoetryPsiBundle.message("QFIX.NAME.install.and.import.package", myPackageName)
+            val name = firstChar + PoetryPsiBundle.message("QFIX.NAME.install.and.import.package", myPackageName)
+            return if (myDev) getDevName(name) else name
         }
 
         override fun getFamilyName(): String {
-            return  0.toString() + PoetryPsiBundle.message("QFIX.install.and.import.package")
+            val name = firstChar + PoetryPsiBundle.message("QFIX.install.and.import.package")
+            return if (myDev) getDevName(name) else name
         }
 
         override fun startInWriteAction(): Boolean {
@@ -184,54 +237,129 @@ class PoetryPackageRequirementsInspection : PyInspection() {
                         val element = myNode.element ?: return
                         CommandProcessor.getInstance().executeCommand(project, {
                             ApplicationManager.getApplication().runWriteAction {
-                                AddImportHelper.addImportStatement(element.containingFile, myPackageName, myAsName,
+                                AddImportHelper.addImportStatement(element.containingFile, myPackageName,
+                                        if (myAsName == myPackageName) null else myAsName,
                                         AddImportHelper.ImportPriority.THIRD_PARTY, element)
                             }
                         }, PoetryPsiBundle.message("INSP.package.requirements.add.import"), "Add import")
                     }
                 }
             })
-            ui.install(listOf(pyRequirement(myPackageName)), emptyList())
+            ui.install(listOf(pyRequirement(myPackageName)), myExtraArgs)
         }
 
-        private fun checkAdminPermissionsAndConfigureInterpreter(project: Project,
-                                                                 descriptor: ProblemDescriptor,
-                                                                 sdk: Sdk): Boolean {
-            if (!PythonSdkUtil.isRemote(sdk) && sdk.adminPermissionsNeeded()) {
-                val answer = askToConfigureInterpreter(project, sdk)
-                when (answer) {
-                    Messages.YES -> {
-                        PyInterpreterInspection.ConfigureInterpreterFix().applyFix(project, descriptor)
-                        return true
-                    }
-                    Messages.CANCEL, -1 -> return true
-                }
-            }
-            return false
-        }
-
-        private fun askToConfigureInterpreter(project: Project, sdk: Sdk): Int {
-            val sdkName = StringUtil.shortenTextWithEllipsis(sdk.name, 25, 0)
-            val text = PoetryPsiBundle.message("INSP.package.requirements.administrator.privileges.required.description", sdkName)
-            val options = arrayOf(
-                    PoetryPsiBundle.message("INSP.package.requirements.administrator.privileges.required.button.configure"),
-                    PoetryPsiBundle.message("INSP.package.requirements.administrator.privileges.required.button.install.anyway"),
-                    CoreBundle.message("button.cancel")
-            )
-            return Messages.showIdeaMessageDialog(
-                    project,
-                    text,
-                    PoetryPsiBundle.message("INSP.package.requirements.administrator.privileges.required"),
-                    options,
-                    0,
-                    Messages.getWarningIcon(),
-                    null)
-        }
 
         init {
             myNode = SmartPointerManager.getInstance(node.project).createSmartPsiElementPointer(node, node.containingFile)
             myModule = ModuleUtilCore.findModuleForPsiElement(node)
             mySdk = PythonSdkUtil.findPythonSdk(myModule)
+            myDev = dev
+            myExtraArgs = if (dev) listOf("--dev") else emptyList()
         }
     }
+
+    class PyInstallRequirementsFix @JvmOverloads constructor(name: String?,
+                                                             module: Module,
+                                                             sdk: Sdk,
+                                                             unsatisfied: List<PyRequirement>,
+                                                             dev: Boolean = false,
+                                                             extraArgs: List<String> = emptyList(),
+                                                             listener: PoetryPackageManagerUI.Listener? = null
+    ) : LocalQuickFix {
+
+        private val myName: String
+        private val myModule: Module
+        private val mySdk: Sdk
+        private val myUnsatisfied: List<PyRequirement>
+        private val myExtraArgs: List<String>
+        private val myListener: PoetryPackageManagerUI.Listener?
+        private val myDev: Boolean
+
+        override fun getName(): @Nls String {
+            val name = firstChar + myName
+            return if (myDev) getDevName(name) else name
+        }
+
+        override fun getFamilyName(): String {
+            val name = firstChar + myName
+            return if (myDev) getDevName(name) else name
+        }
+
+        override fun startInWriteAction(): Boolean {
+            return false
+        }
+
+        override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
+            if (!checkAdminPermissionsAndConfigureInterpreter(project, descriptor, mySdk)) {
+                installPackages(project)
+            }
+        }
+
+        private fun installPackages(project: Project) {
+            val manager = PyPoetryPackageManager.getInstance(mySdk)
+            val packages = manager.packages ?: return
+            val chosen: List<PyRequirement>
+            chosen = if (myUnsatisfied.size > 1) {
+                val dialog = PyChooseRequirementsDialog(project, myUnsatisfied)
+                if (dialog.showAndGet()) {
+                    dialog.markedElements
+                } else {
+                    emptyList()
+                }
+            } else {
+                myUnsatisfied
+            }
+            if (chosen.isEmpty()) {
+                return
+            }
+            val hasManagement: Boolean
+            hasManagement = try {
+                manager.hasManagement()
+            } catch (e: ExecutionException) {
+                false
+            }
+            if (!hasManagement) {
+                val ui = PyPackageManagerUI(project, mySdk, object : RunningPackagingTasksListener(myModule) {
+                    override fun finished(exceptions: List<ExecutionException?>) {
+                        super.finished(exceptions)
+                        if (exceptions.isEmpty()) {
+                            installRequirements(project, chosen)
+                        }
+                    }
+                })
+                ui.installManagement()
+            } else {
+                installRequirements(project, chosen)
+            }
+        }
+
+        private fun installRequirements(project: Project, requirements: List<PyRequirement>) {
+            val listener: RunningPackagingTasksListener = if (myListener == null) RunningPackagingTasksListener(myModule) else object : RunningPackagingTasksListener(myModule) {
+                override fun started() {
+                    super.started()
+                    myListener.started()
+                }
+
+                override fun finished(exceptions: List<ExecutionException?>?) {
+                    super.finished(exceptions)
+                    myListener.finished(exceptions)
+                }
+            }
+            PoetryPackageManagerUI(project, mySdk, listener).install(requirements, myExtraArgs)
+        }
+
+        init {
+            val plural = unsatisfied.size > 1
+            myName = name ?: String.format("Install requirement%s", if (plural) "s" else "")
+            myModule = module
+            mySdk = sdk
+            myDev = dev
+            myUnsatisfied = unsatisfied
+            myExtraArgs = if (dev) {
+                extraArgs + listOf("--dev")
+            } else extraArgs
+            myListener = listener
+        }
+    }
+
 }
