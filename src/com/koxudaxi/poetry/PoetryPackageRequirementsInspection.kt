@@ -155,7 +155,7 @@ class PoetryPackageRequirementsInspection : PyInspection() {
     }
 
     companion object {
-        private fun getPoetryName(name: String, dev: Boolean = false): String {
+        fun getPoetryName(name: String, dev: Boolean = false): String {
             return "${firstChar}$name ${if (dev) "as dev " else firstChar}with poetry"
         }
 
