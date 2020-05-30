@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.0.9</version>
+    <version>0.0.10</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.0.10</h2>
+    <p>Features</p>
+    <ul>
+        <li>Support adding packages with a quick fix [#44] </li>
+    </ul>
     <h2>version 0.0.9</h2>
     <p>Features</p>
     <ul>
@@ -96,8 +101,9 @@
     <extensions defaultExtensionNs="com.intellij">
         <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>
         <projectService serviceImplementation="com.koxudaxi.poetry.PoetryConfigService"/>
-        <localInspection language="Python" shortName="PoetryInterpreterInspection" suppressId="PoetryInterpreter" bundle="messages.PyPsiBundle" displayName="Invalid Poetry interpreter configured" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryInterpreterInspection"/>
-        <localInspection language="Python" shortName="PoetryPackageRequirementsInspection" suppressId="PoetryPackageRequirements" bundle="messages.PyPsiBundle" displayName="Poetry Package requirements" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryPackageRequirementsInspection"/>
+        <localInspection language="Python" shortName="PoetryInterpreterInspection" suppressId="PoetryInterpreter" bundle="messages.PoetryPsiBundle" displayName="Invalid Poetry interpreter configured" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryInterpreterInspection"/>
+        <localInspection language="Python" shortName="PoetryPackageRequirementsInspection" suppressId="PoetryPackageRequirements" bundle="messages.PoetryPsiBundle" displayName="Poetry Package requirements" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryPackageRequirementsInspection"/>
+        <localInspection language="Python" shortName="PoetryUnresolvedReferencesInspection" suppressId="PoetryUnresolvedReferences" bundle="messages.PoetryPsiBundle" key="INSP.NAME.unresolved.refs" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryUnresolvedReferencesInspection" order="first"/>
         <applicationService serviceInterface="com.koxudaxi.poetry.PyPoetryPackageManagers"
                             serviceImplementation="com.koxudaxi.poetry.PyPoetryPackageManagersImpl"/>
     </extensions>

@@ -176,37 +176,37 @@ class PoetryPackageManagerUI(private val myProject: Project, private val mySdk: 
         override fun runTask(indicator: ProgressIndicator): List<ExecutionException> {
             val exceptions: MutableList<ExecutionException> = ArrayList()
             val manager = PyPoetryPackageManager(mySdk)
-            if (myRequirements == null) {
+//            if (myRequirements == null) {
                 indicator.text = PyBundle.message("python.packaging.installing.packages")
                 indicator.isIndeterminate = true
                 try {
-                    manager.install(null, myExtraArgs)
+                    manager.install(myRequirements, myExtraArgs)
                 } catch (e: RunCanceledByUserException) {
                     exceptions.add(e)
                 } catch (e: ExecutionException) {
                     exceptions.add(e)
                 }
-            } else {
-                val size = myRequirements.size
-                for (i in 0 until size) {
-                    val requirement = myRequirements[i]
-                    indicator.text = String.format("Installing package '%s'...", requirement.presentableText)
-                    if (i == 0) {
-                        indicator.isIndeterminate = true
-                    } else {
-                        indicator.isIndeterminate = false
-                        indicator.fraction = i.toDouble() / size
-                    }
-                    try {
-                        manager.install(listOf(requirement), myExtraArgs)
-                    } catch (e: RunCanceledByUserException) {
-                        exceptions.add(e)
-                        break
-                    } catch (e: ExecutionException) {
-                        exceptions.add(e)
-                    }
-                }
-            }
+//            } else {
+//                val size = myRequirements.size
+//                for (i in 0 until size) {
+//                    val requirement = myRequirements[i]
+//                    indicator.text = String.format("Installing package '%s'...", requirement.presentableText)
+//                    if (i == 0) {
+//                        indicator.isIndeterminate = true
+//                    } else {
+//                        indicator.isIndeterminate = false
+//                        indicator.fraction = i.toDouble() / size
+//                    }
+//                    try {
+//                        manager.install(listOf(requirement), myExtraArgs)
+//                    } catch (e: RunCanceledByUserException) {
+//                        exceptions.add(e)
+//                        break
+//                    } catch (e: ExecutionException) {
+//                        exceptions.add(e)
+//                    }
+//                }
+//            }
             manager.refresh()
             return exceptions
         }
