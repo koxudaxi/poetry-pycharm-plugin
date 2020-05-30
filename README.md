@@ -31,7 +31,7 @@ You can install the stable version on PyCharm's `Marketplace` (Preference -> Plu
 ### Implemented
 - add a interpreter with pyproject.toml
 - add a new pyproject.toml when it does not exists
-- [install and import a package with poetry (QuickFix)](#Screen-Shots)
+- [install and import a package with poetry (QuickFix)](#screen-shots)
 - install packages from poetry.lock
 - update and lock with a popup
 - show a message and a link to fix settings (QuickFix)
