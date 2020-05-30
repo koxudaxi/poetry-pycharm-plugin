@@ -72,7 +72,7 @@ I guess if the plugin be used a lot of people, then JetBrains developers will im
 
 
 ## Screen Shots
-![add_package](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/add_package.git)
+![add_package](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/add_package.gif)
 ![new_sdk](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/new_sdk.png)
 ![installed_package](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/installed_package.png)
 ![run_config](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/run_config.png)
