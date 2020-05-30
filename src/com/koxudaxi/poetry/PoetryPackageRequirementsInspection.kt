@@ -155,9 +155,10 @@ class PoetryPackageRequirementsInspection : PyInspection() {
     }
 
     companion object {
-        private fun getDevName(name: String): String {
-            return "$name as dev"
+        private fun getPoetryName(name: String, dev: Boolean = false): String {
+            return "${firstChar}$name ${if (dev) "as dev " else firstChar}with poetry"
         }
+
         // This Hack change order on a quick fix menu.
         private const val firstChar = 0.toChar().toString()
         private fun checkAdminPermissionsAndConfigureInterpreter(project: Project,
@@ -209,13 +210,11 @@ class PoetryPackageRequirementsInspection : PyInspection() {
         private val myDev: Boolean
 
         override fun getName(): @Nls String {
-            val name = firstChar + PoetryPsiBundle.message("QFIX.NAME.install.and.import.package", myPackageName)
-            return if (myDev) getDevName(name) else name
+            return getPoetryName(PoetryPsiBundle.message("QFIX.NAME.install.and.import.package", myPackageName), myDev)
         }
 
         override fun getFamilyName(): String {
-            val name = firstChar + PoetryPsiBundle.message("QFIX.install.and.import.package")
-            return if (myDev) getDevName(name) else name
+            return getPoetryName(PoetryPsiBundle.message("QFIX.install.and.import.package"), myDev)
         }
 
         override fun startInWriteAction(): Boolean {
@@ -276,13 +275,11 @@ class PoetryPackageRequirementsInspection : PyInspection() {
         private val myDev: Boolean
 
         override fun getName(): @Nls String {
-            val name = firstChar + myName
-            return if (myDev) getDevName(name) else name
+            return getPoetryName(myName, myDev)
         }
 
         override fun getFamilyName(): String {
-            val name = firstChar + myName
-            return if (myDev) getDevName(name) else name
+            return name
         }
 
         override fun startInWriteAction(): Boolean {

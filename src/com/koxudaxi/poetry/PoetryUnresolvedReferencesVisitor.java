@@ -358,33 +358,32 @@ public abstract class PoetryUnresolvedReferencesVisitor extends PyInspectionVisi
             return;
           }
 //          ContainerUtil.addAll(fixes, getCreateMemberFromUsageFixes(myTypeEvalContext, type, reference, refText));
-          if (type instanceof PyClassType) {
-            final PyClassType classType = (PyClassType)type;
-            if (reference instanceof PyOperatorReference) {
-              String className = type.getName();
-              if (classType.isDefinition()) {
-                final PyClassLikeType metaClassType = classType.getMetaClassType(myTypeEvalContext, true);
-                if (metaClassType != null) {
-                  className = metaClassType.getName();
-                }
-              }
-              description = PoetryPsiBundle.message("INSP.unresolved.operator.ref",
-                                                className, refName,
-                                                ((PyOperatorReference)reference).getReadableOperatorName());
-            }
-            else {
-              description = PoetryPsiBundle.message("INSP.unresolved.ref.$0.for.class.$1", refText, type.getName());
-            }
-          }
-          else {
-            description = PoetryPsiBundle.message("INSP.cannot.find.$0.in.$1", refText, type.getName());
-          }
+//          if (type instanceof PyClassType) {
+//            final PyClassType classType = (PyClassType)type;
+//            if (reference instanceof PyOperatorReference) {
+//              String className = type.getName();
+//              if (classType.isDefinition()) {
+//                final PyClassLikeType metaClassType = classType.getMetaClassType(myTypeEvalContext, true);
+//                if (metaClassType != null) {
+//                  className = metaClassType.getName();
+//                }
+//              }
+//              description = PoetryPsiBundle.message("INSP.unresolved.operator.ref",
+//                                                className, refName,
+//                                                ((PyOperatorReference)reference).getReadableOperatorName());
+//            }
+//            else {
+//              description = PoetryPsiBundle.message("INSP.unresolved.ref.$0.for.class.$1", refText, type.getName());
+//            }
+//          }
+//          else {
+//            description = PoetryPsiBundle.message("INSP.cannot.find.$0.in.$1", refText, type.getName());
+//          }
           markedQualified = true;
         }
       }
       if (!markedQualified) {
 //        description =  PoetryPsiBundle.message("INSP.unresolved.ref.$0", refText);
-        description = "Poetry does not manage this package";
         ContainerUtil.addAll(fixes, getAutoImportFixes(node, reference, element));
 //        ContainerUtil.addIfNotNull(fixes, getCreateClassFix(myTypeEvalContext, refText, element));
       }
@@ -408,7 +407,10 @@ public abstract class PoetryUnresolvedReferencesVisitor extends PyInspectionVisi
     if (reference instanceof PySubstitutionChunkReference) {
       return;
     }
-
+    if (fixes.isEmpty()) {
+      return;
+    }
+    description = "Poetry does not manage this package";
     registerProblem(node, description, hl_type, null, rangeInElement, fixes.toArray(LocalQuickFix.EMPTY_ARRAY));
   }
 

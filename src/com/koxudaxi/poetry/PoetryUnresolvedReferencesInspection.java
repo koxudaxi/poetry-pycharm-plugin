@@ -92,10 +92,10 @@ public class PoetryUnresolvedReferencesInspection extends PyInspection {
     public void inspectionFinished(@NotNull LocalInspectionToolSession session, @NotNull ProblemsHolder holder) {
         final Visitor visitor = session.getUserData(KEY);
         assert visitor != null;
-        if (PyCodeInsightSettings.getInstance().HIGHLIGHT_UNUSED_IMPORTS) {
-            visitor.highlightUnusedImports();
-        }
-        visitor.highlightImportsInsideGuards();
+//        if (PyCodeInsightSettings.getInstance().HIGHLIGHT_UNUSED_IMPORTS) {
+//            visitor.highlightUnusedImports();
+//        }
+//        visitor.highlightImportsInsideGuards();
         session.putUserData(KEY, null);
     }
 
@@ -138,38 +138,38 @@ public class PoetryUnresolvedReferencesInspection extends PyInspection {
                     .orElse(null);
         }
 
-        public void highlightUnusedImports() {
-            final List<PyInspectionExtension> extensions = PyInspectionExtension.EP_NAME.getExtensionList();
-            final List<PsiElement> unused = collectUnusedImportElements();
-            for (PsiElement element : unused) {
-                if (extensions.stream().anyMatch(extension -> extension.ignoreUnused(element, myTypeEvalContext))) {
-                    continue;
-                }
-                if (element.getTextLength() > 0) {
-                    OptimizeImportsQuickFix fix = new OptimizeImportsQuickFix();
-                    registerProblem(element, PoetryPsiBundle.message("INSP.unused.import.statement"), ProblemHighlightType.LIKE_UNUSED_SYMBOL, null, fix);
-                }
-            }
-        }
+//        public void highlightUnusedImports() {
+//            final List<PyInspectionExtension> extensions = PyInspectionExtension.EP_NAME.getExtensionList();
+//            final List<PsiElement> unused = collectUnusedImportElements();
+//            for (PsiElement element : unused) {
+//                if (extensions.stream().anyMatch(extension -> extension.ignoreUnused(element, myTypeEvalContext))) {
+//                    continue;
+//                }
+//                if (element.getTextLength() > 0) {
+//                    OptimizeImportsQuickFix fix = new OptimizeImportsQuickFix();
+//                    registerProblem(element, PoetryPsiBundle.message("INSP.unused.import.statement"), ProblemHighlightType.LIKE_UNUSED_SYMBOL, null, fix);
+//                }
+//            }
+//        }
 
-        public void highlightImportsInsideGuards() {
-            HashSet<PyImportedNameDefiner> usedImportsInsideImportGuards = Sets.newHashSet(getImportsInsideGuard());
-            usedImportsInsideImportGuards.retainAll(getUsedImports());
-
-            for (PyImportedNameDefiner definer : usedImportsInsideImportGuards) {
-
-                PyImportElement importElement = PyUtil.as(definer, PyImportElement.class);
-                if (importElement == null) {
-                    continue;
-                }
-                final PyTargetExpression asElement = importElement.getAsNameElement();
-                final PyElement toHighlight = asElement != null ? asElement : importElement.getImportReferenceExpression();
-                registerProblem(toHighlight,
-                        PoetryPsiBundle.message("INSP.try.except.import.error",
-                                importElement.getVisibleName()),
-                        ProblemHighlightType.LIKE_UNKNOWN_SYMBOL);
-            }
-        }
+//        public void highlightImportsInsideGuards() {
+//            HashSet<PyImportedNameDefiner> usedImportsInsideImportGuards = Sets.newHashSet(getImportsInsideGuard());
+//            usedImportsInsideImportGuards.retainAll(getUsedImports());
+//
+//            for (PyImportedNameDefiner definer : usedImportsInsideImportGuards) {
+//
+//                PyImportElement importElement = PyUtil.as(definer, PyImportElement.class);
+//                if (importElement == null) {
+//                    continue;
+//                }
+//                final PyTargetExpression asElement = importElement.getAsNameElement();
+//                final PyElement toHighlight = asElement != null ? asElement : importElement.getImportReferenceExpression();
+//                registerProblem(toHighlight,
+//                        PoetryPsiBundle.message("INSP.try.except.import.error",
+//                                importElement.getVisibleName()),
+//                        ProblemHighlightType.LIKE_UNKNOWN_SYMBOL);
+//            }
+//        }
 
         @Override
         public Iterable<LocalQuickFix> getInstallPackageQuickFixes(@NotNull PyElement node,
@@ -195,143 +195,143 @@ public class PoetryUnresolvedReferencesInspection extends PyInspection {
             return Collections.emptyList();
         }
 
-        @Override
-        public Iterable<LocalQuickFix> getAddIgnoredIdentifierQuickFixes(List<QualifiedName> qualifiedNames) {
-            List<LocalQuickFix> result = new ArrayList<>(2);
-            if (qualifiedNames.size() == 1) {
-                final QualifiedName qualifiedName = qualifiedNames.get(0);
-                result.add(new AddIgnoredIdentifierQuickFix(qualifiedName, false));
-                if (qualifiedName.getComponentCount() > 1) {
-                    result.add(new AddIgnoredIdentifierQuickFix(qualifiedName.removeLastComponent(), true));
-                }
-            }
-            return result;
-        }
+//        @Override
+//        public Iterable<LocalQuickFix> getAddIgnoredIdentifierQuickFixes(List<QualifiedName> qualifiedNames) {
+//            List<LocalQuickFix> result = new ArrayList<>(2);
+//            if (qualifiedNames.size() == 1) {
+//                final QualifiedName qualifiedName = qualifiedNames.get(0);
+//                result.add(new AddIgnoredIdentifierQuickFix(qualifiedName, false));
+//                if (qualifiedName.getComponentCount() > 1) {
+//                    result.add(new AddIgnoredIdentifierQuickFix(qualifiedName.removeLastComponent(), true));
+//                }
+//            }
+//            return result;
+//        }
 
-        @Override
-        public Iterable<LocalQuickFix> getImportStatementQuickFixes(PsiElement element) {
-            PyImportStatementBase importStatementBase = PsiTreeUtil.getParentOfType(element, PyImportStatementBase.class);
-            if ((importStatementBase != null) && GenerateBinaryStubsFix.isApplicable(importStatementBase)) {
-                return GenerateBinaryStubsFix.generateFixes(importStatementBase);
-            }
-            return Collections.emptyList();
-        }
+//        @Override
+//        public Iterable<LocalQuickFix> getImportStatementQuickFixes(PsiElement element) {
+//            PyImportStatementBase importStatementBase = PsiTreeUtil.getParentOfType(element, PyImportStatementBase.class);
+//            if ((importStatementBase != null) && GenerateBinaryStubsFix.isApplicable(importStatementBase)) {
+//                return GenerateBinaryStubsFix.generateFixes(importStatementBase);
+//            }
+//            return Collections.emptyList();
+//        }
 
-        @Override
-        public LocalQuickFix getRenameUnresolvedRefQuickFix() {
-            return new PyRenameUnresolvedRefQuickFix();
-        }
+//        @Override
+//        public LocalQuickFix getRenameUnresolvedRefQuickFix() {
+//            return new PyRenameUnresolvedRefQuickFix();
+//        }
 
-        @Override
-        public LocalQuickFix getAddParameterQuickFix(String refName, PyReferenceExpression expr) {
-            final PyFunction parentFunction = PsiTreeUtil.getParentOfType(expr, PyFunction.class);
-            final PyDecorator decorator = PsiTreeUtil.getParentOfType(expr, PyDecorator.class);
-            final PyAnnotation annotation = PsiTreeUtil.getParentOfType(expr, PyAnnotation.class);
-            final PyImportStatement importStatement = PsiTreeUtil.getParentOfType(expr, PyImportStatement.class);
-            if (parentFunction != null && decorator == null && annotation == null && importStatement == null) {
-                return new UnresolvedReferenceAddParameterQuickFix(refName);
-            }
-            return null;
-        }
+//        @Override
+//        public LocalQuickFix getAddParameterQuickFix(String refName, PyReferenceExpression expr) {
+//            final PyFunction parentFunction = PsiTreeUtil.getParentOfType(expr, PyFunction.class);
+//            final PyDecorator decorator = PsiTreeUtil.getParentOfType(expr, PyDecorator.class);
+//            final PyAnnotation annotation = PsiTreeUtil.getParentOfType(expr, PyAnnotation.class);
+//            final PyImportStatement importStatement = PsiTreeUtil.getParentOfType(expr, PyImportStatement.class);
+//            if (parentFunction != null && decorator == null && annotation == null && importStatement == null) {
+//                return new UnresolvedReferenceAddParameterQuickFix(refName);
+//            }
+//            return null;
+//        }
 
-        @Override
-        public LocalQuickFix getCreateFunctionQuickFix(PyReferenceExpression expr) {
-            PyCallExpression callExpression = PsiTreeUtil.getParentOfType(expr, PyCallExpression.class);
-            if (callExpression != null && (!(callExpression.getCallee() instanceof PyQualifiedExpression) ||
-                    ((PyQualifiedExpression) callExpression.getCallee()).getQualifier() == null)) {
-                return new UnresolvedRefCreateFunctionQuickFix(callExpression, expr);
-            }
-            return null;
-        }
+//        @Override
+//        public LocalQuickFix getCreateFunctionQuickFix(PyReferenceExpression expr) {
+//            PyCallExpression callExpression = PsiTreeUtil.getParentOfType(expr, PyCallExpression.class);
+//            if (callExpression != null && (!(callExpression.getCallee() instanceof PyQualifiedExpression) ||
+//                    ((PyQualifiedExpression) callExpression.getCallee()).getQualifier() == null)) {
+//                return new UnresolvedRefCreateFunctionQuickFix(callExpression, expr);
+//            }
+//            return null;
+//        }
 
-        @Override
-        public LocalQuickFix getTrueFalseQuickFix(PyReferenceExpression expr, String refText) {
-            if (refText.equals("true") || refText.equals("false")) {
-                return new UnresolvedRefTrueFalseQuickFix(expr);
-            }
-            return null;
-        }
+//        @Override
+//        public LocalQuickFix getTrueFalseQuickFix(PyReferenceExpression expr, String refText) {
+//            if (refText.equals("true") || refText.equals("false")) {
+//                return new UnresolvedRefTrueFalseQuickFix(expr);
+//            }
+//            return null;
+//        }
 
         private static List<LocalQuickFix> getInstallPackageActions(String packageName, Module module, Sdk sdk) {
             final List<PyRequirement> requirements = Collections.singletonList(PyRequirementsKt.pyRequirement(packageName));
             List<LocalQuickFix> result = new ArrayList<>();
-            final String name = "Install package " + packageName + " by poetry";
+            final String name = "Install package " + packageName;
             result.add(new PoetryPackageRequirementsInspection.PyInstallRequirementsFix(name, module, sdk, requirements, false));
             result.add(new PoetryPackageRequirementsInspection.PyInstallRequirementsFix(name, module, sdk, requirements, true));
             return result;
         }
 
-        @Override
-        public Iterable<LocalQuickFix> getCreateMemberFromUsageFixes(
-                TypeEvalContext typeEvalContext, PyType type, PsiReference reference, String refText
-        ) {
-            List<LocalQuickFix> result = new ArrayList<>();
-            PsiElement element = reference.getElement();
-            if (type instanceof PyClassTypeImpl) {
-                PyClass cls = ((PyClassType) type).getPyClass();
-                if (!PyBuiltinCache.getInstance(element).isBuiltin(cls)) {
-                    if (element.getParent() instanceof PyCallExpression) {
-                        result.add(new AddMethodQuickFix(refText, cls.getName(), true));
-                    } else if (!(reference instanceof PyOperatorReference)) {
-                        result.add(new AddFieldQuickFix(refText, "None", type.getName(), true));
-                    }
-                }
-            } else if (type instanceof PyModuleType) {
-                PyFile file = ((PyModuleType) type).getModule();
-                result.add(new AddFunctionQuickFix(refText, file.getName()));
-                getCreateClassFix(typeEvalContext, refText, element);
-            }
-            return result;
-        }
+//        @Override
+//        public Iterable<LocalQuickFix> getCreateMemberFromUsageFixes(
+//                TypeEvalContext typeEvalContext, PyType type, PsiReference reference, String refText
+//        ) {
+//            List<LocalQuickFix> result = new ArrayList<>();
+//            PsiElement element = reference.getElement();
+//            if (type instanceof PyClassTypeImpl) {
+//                PyClass cls = ((PyClassType) type).getPyClass();
+//                if (!PyBuiltinCache.getInstance(element).isBuiltin(cls)) {
+//                    if (element.getParent() instanceof PyCallExpression) {
+//                        result.add(new AddMethodQuickFix(refText, cls.getName(), true));
+//                    } else if (!(reference instanceof PyOperatorReference)) {
+//                        result.add(new AddFieldQuickFix(refText, "None", type.getName(), true));
+//                    }
+//                }
+//            } else if (type instanceof PyModuleType) {
+//                PyFile file = ((PyModuleType) type).getModule();
+//                result.add(new AddFunctionQuickFix(refText, file.getName()));
+//                getCreateClassFix(typeEvalContext, refText, element);
+//            }
+//            return result;
+//        }
 
-        @Override
-        public Iterable<LocalQuickFix> getAddSelfFixes(TypeEvalContext typeEvalContext, PyElement node, PyReferenceExpression expr) {
-            List<LocalQuickFix> result = new ArrayList<>();
-            final PyClass containedClass = PsiTreeUtil.getParentOfType(node, PyClass.class);
-            final PyFunction function = PsiTreeUtil.getParentOfType(node, PyFunction.class);
-            if (containedClass != null && function != null) {
-                final PyParameter[] parameters = function.getParameterList().getParameters();
-                if (parameters.length == 0) return Collections.emptyList();
-                final String qualifier = parameters[0].getText();
-                final PyDecoratorList decoratorList = function.getDecoratorList();
-                boolean isClassMethod = false;
-                if (decoratorList != null) {
-                    for (PyDecorator decorator : decoratorList.getDecorators()) {
-                        final PyExpression callee = decorator.getCallee();
-                        if (callee != null && PyNames.CLASSMETHOD.equals(callee.getText())) {
-                            isClassMethod = true;
-                        }
-                    }
-                }
-                for (PyTargetExpression target : containedClass.getInstanceAttributes()) {
-                    if (!isClassMethod && Comparing.strEqual(node.getName(), target.getName())) {
-                        result.add(new UnresolvedReferenceAddSelfQuickFix(expr, qualifier));
-                    }
-                }
-                for (PyStatement statement : containedClass.getStatementList().getStatements()) {
-                    if (statement instanceof PyAssignmentStatement) {
-                        PyExpression lhsExpression = ((PyAssignmentStatement) statement).getLeftHandSideExpression();
-                        if (lhsExpression != null && lhsExpression.getText().equals(expr.getText())) {
-                            PyExpression assignedValue = ((PyAssignmentStatement) statement).getAssignedValue();
-                            if (assignedValue instanceof PyCallExpression) {
-                                PyType type = typeEvalContext.getType(assignedValue);
-                                if (type instanceof PyClassTypeImpl) {
-                                    if (((PyCallExpression) assignedValue).isCalleeText(PyNames.PROPERTY)) {
-                                        result.add(new UnresolvedReferenceAddSelfQuickFix(expr, qualifier));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                for (PyFunction method : containedClass.getMethods()) {
-                    if (expr.getText().equals(method.getName())) {
-                        result.add(new UnresolvedReferenceAddSelfQuickFix(expr, qualifier));
-                    }
-                }
-            }
-            return result;
-        }
+//        @Override
+//        public Iterable<LocalQuickFix> getAddSelfFixes(TypeEvalContext typeEvalContext, PyElement node, PyReferenceExpression expr) {
+//            List<LocalQuickFix> result = new ArrayList<>();
+//            final PyClass containedClass = PsiTreeUtil.getParentOfType(node, PyClass.class);
+//            final PyFunction function = PsiTreeUtil.getParentOfType(node, PyFunction.class);
+//            if (containedClass != null && function != null) {
+//                final PyParameter[] parameters = function.getParameterList().getParameters();
+//                if (parameters.length == 0) return Collections.emptyList();
+//                final String qualifier = parameters[0].getText();
+//                final PyDecoratorList decoratorList = function.getDecoratorList();
+//                boolean isClassMethod = false;
+//                if (decoratorList != null) {
+//                    for (PyDecorator decorator : decoratorList.getDecorators()) {
+//                        final PyExpression callee = decorator.getCallee();
+//                        if (callee != null && PyNames.CLASSMETHOD.equals(callee.getText())) {
+//                            isClassMethod = true;
+//                        }
+//                    }
+//                }
+//                for (PyTargetExpression target : containedClass.getInstanceAttributes()) {
+//                    if (!isClassMethod && Comparing.strEqual(node.getName(), target.getName())) {
+//                        result.add(new UnresolvedReferenceAddSelfQuickFix(expr, qualifier));
+//                    }
+//                }
+//                for (PyStatement statement : containedClass.getStatementList().getStatements()) {
+//                    if (statement instanceof PyAssignmentStatement) {
+//                        PyExpression lhsExpression = ((PyAssignmentStatement) statement).getLeftHandSideExpression();
+//                        if (lhsExpression != null && lhsExpression.getText().equals(expr.getText())) {
+//                            PyExpression assignedValue = ((PyAssignmentStatement) statement).getAssignedValue();
+//                            if (assignedValue instanceof PyCallExpression) {
+//                                PyType type = typeEvalContext.getType(assignedValue);
+//                                if (type instanceof PyClassTypeImpl) {
+//                                    if (((PyCallExpression) assignedValue).isCalleeText(PyNames.PROPERTY)) {
+//                                        result.add(new UnresolvedReferenceAddSelfQuickFix(expr, qualifier));
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//                for (PyFunction method : containedClass.getMethods()) {
+//                    if (expr.getText().equals(method.getName())) {
+//                        result.add(new UnresolvedReferenceAddSelfQuickFix(expr, qualifier));
+//                    }
+//                }
+//            }
+//            return result;
+//        }
 
         @Override
         public Iterable<LocalQuickFix> getAutoImportFixes(PyElement node, PsiReference reference, PsiElement element) {
@@ -380,49 +380,49 @@ public class PoetryUnresolvedReferencesInspection extends PyInspection {
             return result;
         }
 
-        private static boolean suppressHintForAutoImport(PyElement node, AutoImportQuickFix importFix) {
-            // if the context doesn't look like a function call and we only found imports of functions, suggest auto-import
-            // as a quickfix but no popup balloon (PY-2312)
-            if (!isCall(node) && importFix.hasOnlyFunctions()) {
-                return true;
-            }
-            // if we're in a class context and the class defines a variable with the same name, offer auto-import only as quickfix,
-            // not as popup
-            PyClass containingClass = PsiTreeUtil.getParentOfType(node, PyClass.class);
-            if (containingClass != null && (containingClass.findMethodByName(importFix.getNameToImport(), true, null) != null ||
-                    containingClass.findInstanceAttribute(importFix.getNameToImport(), true) != null)) {
-                return true;
-            }
-            return false;
-        }
+//        private static boolean suppressHintForAutoImport(PyElement node, AutoImportQuickFix importFix) {
+//            // if the context doesn't look like a function call and we only found imports of functions, suggest auto-import
+//            // as a quickfix but no popup balloon (PY-2312)
+//            if (!isCall(node) && importFix.hasOnlyFunctions()) {
+//                return true;
+//            }
+//            // if we're in a class context and the class defines a variable with the same name, offer auto-import only as quickfix,
+//            // not as popup
+//            PyClass containingClass = PsiTreeUtil.getParentOfType(node, PyClass.class);
+//            if (containingClass != null && (containingClass.findMethodByName(importFix.getNameToImport(), true, null) != null ||
+//                    containingClass.findInstanceAttribute(importFix.getNameToImport(), true) != null)) {
+//                return true;
+//            }
+//            return false;
+//        }
 
-        @Override
-        public LocalQuickFix getCreateClassFix(TypeEvalContext typeEvalContext, @NonNls String refText, PsiElement element) {
-            if (refText.length() > 2 && Character.isUpperCase(refText.charAt(0)) && !StringUtil.toUpperCase(refText).equals(refText) &&
-                    PsiTreeUtil.getParentOfType(element, PyImportStatementBase.class) == null) {
-                PsiElement anchor = element;
-                if (element instanceof PyQualifiedExpression) {
-                    final PyExpression expr = ((PyQualifiedExpression) element).getQualifier();
-                    if (expr != null) {
-                        final PyType type = typeEvalContext.getType(expr);
-                        if (type instanceof PyModuleType) {
-                            anchor = ((PyModuleType) type).getModule();
-                        } else {
-                            anchor = null;
-                        }
-                    }
-                    if (anchor != null) {
-                        return new CreateClassQuickFix(refText, anchor);
-                    }
-                }
-            }
-            return null;
-        }
+//        @Override
+//        public LocalQuickFix getCreateClassFix(TypeEvalContext typeEvalContext, @NonNls String refText, PsiElement element) {
+//            if (refText.length() > 2 && Character.isUpperCase(refText.charAt(0)) && !StringUtil.toUpperCase(refText).equals(refText) &&
+//                    PsiTreeUtil.getParentOfType(element, PyImportStatementBase.class) == null) {
+//                PsiElement anchor = element;
+//                if (element instanceof PyQualifiedExpression) {
+//                    final PyExpression expr = ((PyQualifiedExpression) element).getQualifier();
+//                    if (expr != null) {
+//                        final PyType type = typeEvalContext.getType(expr);
+//                        if (type instanceof PyModuleType) {
+//                            anchor = ((PyModuleType) type).getModule();
+//                        } else {
+//                            anchor = null;
+//                        }
+//                    }
+//                    if (anchor != null) {
+//                        return new CreateClassQuickFix(refText, anchor);
+//                    }
+//                }
+//            }
+//            return null;
+//        }
 
-        private static boolean isCall(PyElement node) {
-            final PyCallExpression callExpression = PsiTreeUtil.getParentOfType(node, PyCallExpression.class);
-            return callExpression != null && node == callExpression.getCallee();
-        }
+//        private static boolean isCall(PyElement node) {
+//            final PyCallExpression callExpression = PsiTreeUtil.getParentOfType(node, PyCallExpression.class);
+//            return callExpression != null && node == callExpression.getCallee();
+//        }
 
 //    @Override
 //    public Iterable<LocalQuickFix> getPluginQuickFixes(PsiReference reference) {
