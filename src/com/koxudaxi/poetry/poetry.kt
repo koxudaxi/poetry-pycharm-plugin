@@ -39,15 +39,20 @@ import com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectSdksModel
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.util.UserDataHolder
+import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.StandardFileSystems
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.util.PathUtil
+import com.intellij.util.PlatformUtils
+import com.jetbrains.python.PyBundle
 import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
+import com.jetbrains.python.sdk.add.*
 import com.jetbrains.python.statistics.modules
 import icons.PythonIcons
 import org.apache.tuweni.toml.Toml
@@ -519,4 +524,54 @@ fun runPoetryInBackground(module: Module, args: List<String>, description: Strin
         }
     }
     ProgressManager.getInstance().run(task)
+}
+
+private fun allowCreatingNewEnvironments(project: Project?) =
+        project != null || !PlatformUtils.isPyCharm() || PlatformUtils.isPyCharmEducational()
+
+fun createPoetryPanel(project: Project?,
+                      module: Module?,
+                      existingSdks: List<Sdk>,
+                      newProjectPath: String?,
+                      context: UserDataHolder
+): PyAddSdkPanel {
+    val newPoetryPanel = when {
+        allowCreatingNewEnvironments(project) -> PyAddNewPoetryPanel(project, module, existingSdks, null, context)
+        else -> null
+    }
+    val existingPoetryPanel = PyAddExistingPoetryEnvPanel(project, module, existingSdks, null, context)
+    val panels = listOfNotNull(newPoetryPanel, existingPoetryPanel)
+    val defaultPanel = when {
+        detectPoetryEnvs(module, existingSdks, context, project?.basePath
+                ?: newProjectPath).any { it.isAssociatedWithModule(module) } -> existingPoetryPanel
+        newPoetryPanel != null -> newPoetryPanel
+        else -> existingPoetryPanel
+    }
+    return PyAddSdkGroupPanel(PoetryBundle.messagePointer("python.add.sdk.panel.name.poetry.environment"),
+            PythonIcons.Python.Virtualenv, panels, defaultPanel)
+}
+
+
+fun detectPoetryEnvs(module: Module?, existingSdks: List<Sdk>, context: UserDataHolder, projectPath: String?): List<PyDetectedSdk> {
+    // TODO: implement detecting logic
+//    if (module != null) {
+//        return detectVirtualEnvs(module, existingSdks, context).filter {
+//            isPoetry(module.project, it)
+//        }
+//    }
+
+    if (projectPath == null) return emptyList()
+    return ApplicationManager.getApplication().executeOnPooledThread<List<PyDetectedSdk>> {
+        return@executeOnPooledThread getPoetryEnvs(projectPath).map { PyDetectedSdk(it) }
+    }.get()
+}
+
+fun getPoetryEnvs(projectPath: String): List<String> {
+    return try {
+        val result = runPoetry(projectPath, "env", "list", "--full-path")
+        result.lineSequence().map { it.split(" ")[0] }.toList()
+    } catch (e: PyExecutionException) {
+        emptyList()
+    }
+
 }

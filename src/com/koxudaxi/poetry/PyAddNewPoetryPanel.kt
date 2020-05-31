@@ -43,11 +43,11 @@ import javax.swing.event.DocumentEvent
  *  This source code is edited by @koxudaxi  (Koudai Aono)
  */
 
-class PyAddPoetryPanel(private val project: Project?,
-                       private val module: Module?,
-                       private val existingSdks: List<Sdk>,
-                       override var newProjectPath: String?,
-                       context: UserDataHolder) : PyAddNewEnvPanel() {
+class PyAddNewPoetryPanel(private val project: Project?,
+                          private val module: Module?,
+                          private val existingSdks: List<Sdk>,
+                          override var newProjectPath: String?,
+                          context: UserDataHolder) : PyAddNewEnvPanel() {
     override val envName = "Poetry"
     override val panelName: String get() = "Poetry Environment"
 
