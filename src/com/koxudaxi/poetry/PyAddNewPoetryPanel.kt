@@ -184,7 +184,9 @@ class PyAddNewPoetryPanel(private val project: Project?,
         if (addedPoetry.homeDirectory == null) return null
         // TODO: check existing envs
         if (isVirtualEnvsInProject(path) == false) return null
-        return ValidationInfo("Poetery interpreter has been already added, select '${addedPoetry.name}'")
+        val inProjectEnvExecutable = inProjectEnvPath?.let {getPythonExecutable(it)} ?: return null
+        val inProjectEnv =  existingSdks.find { it.homePath == inProjectEnvExecutable } ?: return null
+        return ValidationInfo("Poetry interpreter has been already added, select '${inProjectEnv.name}'")
     }
 
 
@@ -193,4 +195,8 @@ class PyAddNewPoetryPanel(private val project: Project?,
      */
     private val projectPath: String?
         get() = newProjectPath ?: selectedModule?.basePath ?: project?.basePath
+
+    private val inProjectEnvDir = ".venv"
+    private val inProjectEnvPath: String?
+        get() = projectPath?.let { it + File.separator + inProjectEnvDir }
 }

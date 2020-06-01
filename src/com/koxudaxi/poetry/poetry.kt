@@ -63,6 +63,8 @@ import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
 import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
 const val POETRY_LOCK: String = "poetry.lock"
@@ -561,15 +563,15 @@ fun createPoetryPanel(project: Project?,
 fun detectPoetryEnvs(module: Module?, existingSdks: List<Sdk>, context: UserDataHolder, projectPath: String?): List<PyDetectedSdk> {
     if (projectPath == null) return emptyList()
     val existingSdkPaths = existingSdks.mapNotNull { it.homePath }.toSet()
-    return ApplicationManager.getApplication().executeOnPooledThread<List<PyDetectedSdk>> {
-        return@executeOnPooledThread getPoetryEnvs(projectPath).filterNot { existingSdkPaths.contains(getPythonExecutable(it)) }.map { PyDetectedSdk(it) }
-    }.get()
+    return getPoetryEnvs(projectPath).filterNot { existingSdkPaths.contains(getPythonExecutable(it)) }.map { PyDetectedSdk(it) }
 }
 
 fun getPoetryEnvs(projectPath: String): List<String> {
     return try {
-        val result = runPoetry(projectPath, "env", "list", "--full-path")
-        result.lineSequence().mapNotNull { it.split(" ")[0] }.filterNot { it.isEmpty() }.toList()
+        ApplicationManager.getApplication().executeOnPooledThread<List<String>> {
+            val result = runPoetry(projectPath, "env", "list", "--full-path")
+            result.lineSequence().mapNotNull { it.split(" ")[0] }.filterNot { it.isEmpty() }.toList()
+        }.get(10, TimeUnit.SECONDS)
     } catch (e: PyExecutionException) {
         emptyList()
     }
@@ -577,13 +579,15 @@ fun getPoetryEnvs(projectPath: String): List<String> {
 
 fun isVirtualEnvsInProject(projectPath: String): Boolean? {
     return try {
-        runPoetry(projectPath, "config", "virtualenvs.in-project").trim() == "true"
+        ApplicationManager.getApplication().executeOnPooledThread<Boolean> {
+            runPoetry(projectPath, "config", "virtualenvs.in-project").trim() == "true"
+        }.get(10, TimeUnit.SECONDS)
     } catch (e: PyExecutionException) {
-        return null
+        null
+    } catch (e: TimeoutException) {
+        null
     }
 }
-
-
 
 fun getPythonExecutable(homePath: String): String {
     return PythonSdkUtil.getPythonExecutable(homePath) ?: FileUtil.join(homePath, "bin", "python")
