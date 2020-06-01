@@ -20,7 +20,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.util.UserDataHolder
-import com.intellij.ui.components.JBCheckBox
 import com.intellij.util.ui.FormBuilder
 import com.jetbrains.python.PyBundle
 import com.jetbrains.python.sdk.*
@@ -31,7 +30,6 @@ import com.jetbrains.python.sdk.add.addInterpretersAsync
 import icons.PythonIcons
 import java.awt.BorderLayout
 import javax.swing.Icon
-import javax.swing.JPanel
 
 /**
  * @author vlan
@@ -45,37 +43,35 @@ class PyAddExistingPoetryEnvPanel(private val project: Project?,
                                   private val module: Module?,
                                   private val existingSdks: List<Sdk>,
                                   override var newProjectPath: String?,
-                                  context:UserDataHolder ) : PyAddSdkPanel() {
-  override val panelName: String get() = PyBundle.message("python.add.sdk.panel.name.existing.environment")
-  override val icon: Icon = PythonIcons.Python.Virtualenv
-  private val sdkComboBox = PySdkPathChoosingComboBox()
-//  private val makeSharedField = JBCheckBox(PyBundle.message("available.to.all.projects"))
+                                  context: UserDataHolder) : PyAddSdkPanel() {
+    override val panelName: String get() = PyBundle.message("python.add.sdk.panel.name.existing.environment")
+    override val icon: Icon = PythonIcons.Python.Virtualenv
+    private val sdkComboBox = PySdkPathChoosingComboBox()
 
-  init {
-    layout = BorderLayout()
-    val formPanel = FormBuilder.createFormBuilder()
-      .addLabeledComponent(PyBundle.message("interpreter"), sdkComboBox)
-//      .addComponent(makeSharedField)
-      .panel
-    add(formPanel, BorderLayout.NORTH)
-    addInterpretersAsync(sdkComboBox) {
-      detectPoetryEnvs(module, existingSdks, context, project?.basePath?: newProjectPath)
-              .filterNot { it.isAssociatedWithAnotherModule(module) }
+    init {
+        layout = BorderLayout()
+        val formPanel = FormBuilder.createFormBuilder()
+                .addLabeledComponent(PyBundle.message("interpreter"), sdkComboBox)
+                .panel
+        add(formPanel, BorderLayout.NORTH)
+        addInterpretersAsync(sdkComboBox) {
+            detectPoetryEnvs(module, existingSdks, context, project?.basePath ?: newProjectPath)
+                    .filterNot { it.isAssociatedWithAnotherModule(module) }
+        }
     }
-  }
 
-  override fun validateAll(): List<ValidationInfo> = listOfNotNull(validateSdkComboBox(sdkComboBox, this))
+    override fun validateAll(): List<ValidationInfo> = listOfNotNull(validateSdkComboBox(sdkComboBox, this))
 
-  override fun getOrCreateSdk(): Sdk? {
-    return when (val sdk = sdkComboBox.selectedSdk) {
-      is PyDetectedSdk -> sdk.setupAssociated(existingSdks, newProjectPath ?: project?.basePath)?.apply {
-//        if (!makeSharedField.isSelected) {
-          associateWithModule(module, newProjectPath)
-//        }
-      }
-      else -> sdk
+    override fun getOrCreateSdk(): Sdk? {
+        return when (val sdk = sdkComboBox.selectedSdk) {
+            is PyDetectedSdk ->
+                setupPoetrySdkUnderProgress(project, module, existingSdks, newProjectPath,
+                        getPythonExecutable(sdk.name), false, sdk.name)?.apply {
+                    PySdkSettings.instance.preferredVirtualEnvBaseSdk = getPythonExecutable(sdk.name)
+                }
+            else -> sdk
+        }
     }
-  }
 
     companion object {
         fun validateSdkComboBox(field: PySdkPathChoosingComboBox, view: PyAddSdkView): ValidationInfo? {

@@ -150,14 +150,20 @@ fun setupPoetrySdkUnderProgress(project: Project?,
                                 existingSdks: List<Sdk>,
                                 newProjectPath: String?,
                                 python: String?,
-                                installPackages: Boolean): Sdk? {
+                                installPackages: Boolean,
+                                poetryPath: String? = null): Sdk? {
     val projectPath = newProjectPath ?: module?.basePath ?: project?.basePath ?: return null
     val task = object : Task.WithResult<String, ExecutionException>(project, "Setting Up Poetry Environment", true) {
         override fun compute(indicator: ProgressIndicator): String {
             indicator.isIndeterminate = true
-            val init = StandardFileSystems.local().findFileByPath(projectPath)?.findChild(PY_PROJECT_TOML)?.let { getPyProjectTomlForPoetry(it) } == null
-            val poetry = setupPoetry(FileUtil.toSystemDependentName(projectPath), python, installPackages, init)
-            return PythonSdkUtil.getPythonExecutable(poetry) ?: FileUtil.join(poetry, "bin", "python")
+            val poetry = when (poetryPath) {
+                is String -> poetryPath
+                else -> {
+                    val init = StandardFileSystems.local().findFileByPath(projectPath)?.findChild(PY_PROJECT_TOML)?.let { getPyProjectTomlForPoetry(it) } == null
+                    setupPoetry(FileUtil.toSystemDependentName(projectPath), python, installPackages, init)
+                }
+            }
+            return getPythonExecutable(poetry)
         }
     }
 
@@ -553,25 +559,32 @@ fun createPoetryPanel(project: Project?,
 
 
 fun detectPoetryEnvs(module: Module?, existingSdks: List<Sdk>, context: UserDataHolder, projectPath: String?): List<PyDetectedSdk> {
-    // TODO: implement detecting logic
-//    if (module != null) {
-//        return detectVirtualEnvs(module, existingSdks, context).filter {
-//            isPoetry(module.project, it)
-//        }
-//    }
-
     if (projectPath == null) return emptyList()
+    val existingSdkPaths = existingSdks.mapNotNull { it.homePath }.toSet()
     return ApplicationManager.getApplication().executeOnPooledThread<List<PyDetectedSdk>> {
-        return@executeOnPooledThread getPoetryEnvs(projectPath).map { PyDetectedSdk(it) }
+        return@executeOnPooledThread getPoetryEnvs(projectPath).filterNot { existingSdkPaths.contains(getPythonExecutable(it)) }.map { PyDetectedSdk(it) }
     }.get()
 }
 
 fun getPoetryEnvs(projectPath: String): List<String> {
     return try {
         val result = runPoetry(projectPath, "env", "list", "--full-path")
-        result.lineSequence().map { it.split(" ")[0] }.toList()
+        result.lineSequence().mapNotNull { it.split(" ")[0] }.filterNot { it.isEmpty() }.toList()
     } catch (e: PyExecutionException) {
         emptyList()
     }
+}
 
+fun isVirtualEnvsInProject(projectPath: String): Boolean? {
+    return try {
+        runPoetry(projectPath, "config", "virtualenvs.in-project").trim() == "true"
+    } catch (e: PyExecutionException) {
+        return null
+    }
+}
+
+
+
+fun getPythonExecutable(homePath: String): String {
+    return PythonSdkUtil.getPythonExecutable(homePath) ?: FileUtil.join(homePath, "bin", "python")
 }

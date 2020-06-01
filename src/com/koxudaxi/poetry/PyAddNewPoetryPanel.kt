@@ -182,6 +182,8 @@ class PyAddNewPoetryPanel(private val project: Project?,
             it.associatedModulePath == path && isPoetry(project, it)
         } ?: return null
         if (addedPoetry.homeDirectory == null) return null
+        // TODO: check existing envs
+        if (isVirtualEnvsInProject(path) == false) return null
         return ValidationInfo("Poetery interpreter has been already added, select '${addedPoetry.name}'")
     }
 
