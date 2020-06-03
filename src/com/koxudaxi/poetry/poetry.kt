@@ -45,6 +45,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.StandardFileSystems
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiElement
 import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.util.PathUtil
 import com.intellij.util.PlatformUtils
@@ -61,6 +62,7 @@ import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
+import org.jetbrains.kotlin.tools.projectWizard.core.toResult
 import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -191,6 +193,7 @@ fun setupPoetrySdkUnderProgress(project: Project?,
  */
 fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPackages: Boolean, init: Boolean): @SystemDependent String {
     if (init) {
+        python?.let { runPoetry(projectPath, "env", "use", it) }
         runPoetry(projectPath, *listOf("init", "-n").toTypedArray())
     }
     when {
@@ -216,6 +219,7 @@ fun runPoetry(sdk: Sdk, vararg args: String): String {
     val projectPath = sdk.associatedModulePath
             ?: throw PyExecutionException("Cannot find the project associated with this Poetry environment",
                     "Poetry", emptyList(), ProcessOutput())
+    runPoetry(projectPath, "env", "use", sdk.homePath!!)
     return runPoetry(projectPath, *args)
 }
 
@@ -566,29 +570,32 @@ fun detectPoetryEnvs(module: Module?, existingSdks: List<Sdk>, context: UserData
     return getPoetryEnvs(projectPath).filterNot { existingSdkPaths.contains(getPythonExecutable(it)) }.map { PyDetectedSdk(it) }
 }
 
-fun getPoetryEnvs(projectPath: String): List<String> {
-    return try {
-        ApplicationManager.getApplication().executeOnPooledThread<List<String>> {
-            val result = runPoetry(projectPath, "env", "list", "--full-path")
+fun getPoetryEnvs(projectPath: String): List<String> =
+        syncRunPoetry(projectPath, "env", "list", "--full-path", defaultResult = emptyList()) { result ->
             result.lineSequence().mapNotNull { it.split(" ")[0] }.filterNot { it.isEmpty() }.toList()
-        }.get(10, TimeUnit.SECONDS)
-    } catch (e: PyExecutionException) {
-        emptyList()
-    }
-}
+        }
 
-fun isVirtualEnvsInProject(projectPath: String): Boolean? {
+
+fun isVirtualEnvsInProject(projectPath: String): Boolean? =
+        syncRunPoetry(projectPath, "config", "virtualenvs.in-project", defaultResult = null) {
+            it.trim() == "true"
+        }
+
+
+inline fun <reified T> syncRunPoetry(projectPath: @SystemDependent String, vararg args: String, defaultResult: T, crossinline callback: (String) -> T): T {
     return try {
-        ApplicationManager.getApplication().executeOnPooledThread<Boolean> {
-            runPoetry(projectPath, "config", "virtualenvs.in-project").trim() == "true"
+        ApplicationManager.getApplication().executeOnPooledThread<T> {
+            try {
+                val result = runPoetry(projectPath, *args)
+                callback(result)
+            } catch (e: PyExecutionException) {
+                defaultResult
+            }
         }.get(10, TimeUnit.SECONDS)
-    } catch (e: PyExecutionException) {
-        null
     } catch (e: TimeoutException) {
-        null
+        defaultResult
     }
 }
 
-fun getPythonExecutable(homePath: String): String {
-    return PythonSdkUtil.getPythonExecutable(homePath) ?: FileUtil.join(homePath, "bin", "python")
-}
+fun getPythonExecutable(homePath: String): String =
+        PythonSdkUtil.getPythonExecutable(homePath) ?: FileUtil.join(homePath, "bin", "python")
