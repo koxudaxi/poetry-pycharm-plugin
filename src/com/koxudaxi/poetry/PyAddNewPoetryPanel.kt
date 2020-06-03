@@ -43,11 +43,11 @@ import javax.swing.event.DocumentEvent
  *  This source code is edited by @koxudaxi  (Koudai Aono)
  */
 
-class PyAddPoetryPanel(private val project: Project?,
-                       private val module: Module?,
-                       private val existingSdks: List<Sdk>,
-                       override var newProjectPath: String?,
-                       context: UserDataHolder) : PyAddNewEnvPanel() {
+class PyAddNewPoetryPanel(private val project: Project?,
+                          private val module: Module?,
+                          private val existingSdks: List<Sdk>,
+                          override var newProjectPath: String?,
+                          context: UserDataHolder) : PyAddNewEnvPanel() {
     override val envName = "Poetry"
     override val panelName: String get() = "Poetry Environment"
 
@@ -182,7 +182,11 @@ class PyAddPoetryPanel(private val project: Project?,
             it.associatedModulePath == path && isPoetry(project, it)
         } ?: return null
         if (addedPoetry.homeDirectory == null) return null
-        return ValidationInfo("Poetery interpreter has been already added, select '${addedPoetry.name}'")
+        // TODO: check existing envs
+        if (isVirtualEnvsInProject(path) == false) return null
+        val inProjectEnvExecutable = inProjectEnvPath?.let {getPythonExecutable(it)} ?: return null
+        val inProjectEnv =  existingSdks.find { it.homePath == inProjectEnvExecutable } ?: return null
+        return ValidationInfo("Poetry interpreter has been already added, select '${inProjectEnv.name}'")
     }
 
 
@@ -191,4 +195,8 @@ class PyAddPoetryPanel(private val project: Project?,
      */
     private val projectPath: String?
         get() = newProjectPath ?: selectedModule?.basePath ?: project?.basePath
+
+    private val inProjectEnvDir = ".venv"
+    private val inProjectEnvPath: String?
+        get() = projectPath?.let { it + File.separator + inProjectEnvDir }
 }

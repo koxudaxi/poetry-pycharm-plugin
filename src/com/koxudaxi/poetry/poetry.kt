@@ -39,15 +39,18 @@ import com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectSdksModel
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.StandardFileSystems
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.util.PathUtil
+import com.intellij.util.PlatformUtils
 import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
+import com.jetbrains.python.sdk.add.*
 import com.jetbrains.python.statistics.modules
 import icons.PythonIcons
 import org.apache.tuweni.toml.Toml
@@ -58,11 +61,14 @@ import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
 import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
 const val POETRY_LOCK: String = "poetry.lock"
 const val POETRY_DEFAULT_SOURCE_URL: String = "https://pypi.org/simple"
 const val POETRY_PATH_SETTING: String = "PyCharm.Poetry.Path"
+const val REPLACE_PYTHON_VERSION = """import re,sys;f=open("pyproject.toml", "r+");orig=f.read();f.seek(0);f.write(re.sub(r"(python = \"\^)[^\"]+(\")", "\g<1>"+sys.version.split()[0]+"\g<2>", orig))"""
 
 // TODO: Provide a special icon for poetry
 // TODO: Need a extension point
@@ -145,14 +151,20 @@ fun setupPoetrySdkUnderProgress(project: Project?,
                                 existingSdks: List<Sdk>,
                                 newProjectPath: String?,
                                 python: String?,
-                                installPackages: Boolean): Sdk? {
+                                installPackages: Boolean,
+                                poetryPath: String? = null): Sdk? {
     val projectPath = newProjectPath ?: module?.basePath ?: project?.basePath ?: return null
     val task = object : Task.WithResult<String, ExecutionException>(project, "Setting Up Poetry Environment", true) {
         override fun compute(indicator: ProgressIndicator): String {
             indicator.isIndeterminate = true
-            val init = StandardFileSystems.local().findFileByPath(projectPath)?.findChild(PY_PROJECT_TOML)?.let { getPyProjectTomlForPoetry(it) } == null
-            val poetry = setupPoetry(FileUtil.toSystemDependentName(projectPath), python, installPackages, init)
-            return PythonSdkUtil.getPythonExecutable(poetry) ?: FileUtil.join(poetry, "bin", "python")
+            val poetry = when (poetryPath) {
+                is String -> poetryPath
+                else -> {
+                    val init = StandardFileSystems.local().findFileByPath(projectPath)?.findChild(PY_PROJECT_TOML)?.let { getPyProjectTomlForPoetry(it) } == null
+                    setupPoetry(FileUtil.toSystemDependentName(projectPath), python, installPackages, init)
+                }
+            }
+            return getPythonExecutable(poetry)
         }
     }
 
@@ -179,6 +191,10 @@ fun setupPoetrySdkUnderProgress(project: Project?,
 fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPackages: Boolean, init: Boolean): @SystemDependent String {
     if (init) {
         runPoetry(projectPath, *listOf("init", "-n").toTypedArray())
+        if (python != null){
+            // Replace python version in toml
+            runCommand(projectPath, python,"-c", REPLACE_PYTHON_VERSION)
+        }
     }
     when {
         installPackages -> {
@@ -203,6 +219,7 @@ fun runPoetry(sdk: Sdk, vararg args: String): String {
     val projectPath = sdk.associatedModulePath
             ?: throw PyExecutionException("Cannot find the project associated with this Poetry environment",
                     "Poetry", emptyList(), ProcessOutput())
+    runPoetry(projectPath, "env", "use", sdk.homePath!!)
     return runPoetry(projectPath, *args)
 }
 
@@ -233,6 +250,25 @@ fun runPoetry(projectPath: @SystemDependent String, vararg args: String): String
                 throw RunCanceledByUserException()
             exitCode != 0 ->
                 throw PyExecutionException("Error Running Poetry", executable, args.asList(),
+                        stdout, stderr, exitCode, emptyList())
+            else -> stdout
+        }
+    }
+}
+
+fun runCommand(projectPath: @SystemDependent String, command: String, vararg args: String): String {
+    val commandLine = GeneralCommandLine(listOf(command) + args).withWorkDirectory(projectPath)
+    val handler = CapturingProcessHandler(commandLine)
+
+    val result = with(handler) {
+        runProcess()
+    }
+    return with(result) {
+        when {
+            isCancelled ->
+                throw RunCanceledByUserException()
+            exitCode != 0 ->
+                throw PyExecutionException("Error Running", command, args.asList(),
                         stdout, stderr, exitCode, emptyList())
             else -> stdout
         }
@@ -520,3 +556,65 @@ fun runPoetryInBackground(module: Module, args: List<String>, description: Strin
     }
     ProgressManager.getInstance().run(task)
 }
+
+private fun allowCreatingNewEnvironments(project: Project?) =
+        project != null || !PlatformUtils.isPyCharm() || PlatformUtils.isPyCharmEducational()
+
+fun createPoetryPanel(project: Project?,
+                      module: Module?,
+                      existingSdks: List<Sdk>,
+                      newProjectPath: String?,
+                      context: UserDataHolder
+): PyAddSdkPanel {
+    val newPoetryPanel = when {
+        allowCreatingNewEnvironments(project) -> PyAddNewPoetryPanel(project, module, existingSdks, null, context)
+        else -> null
+    }
+    val existingPoetryPanel = PyAddExistingPoetryEnvPanel(project, module, existingSdks, null, context)
+    val panels = listOfNotNull(newPoetryPanel, existingPoetryPanel)
+    val defaultPanel = when {
+        detectPoetryEnvs(module, existingSdks, context, project?.basePath
+                ?: newProjectPath).any { it.isAssociatedWithModule(module) } -> existingPoetryPanel
+        newPoetryPanel != null -> newPoetryPanel
+        else -> existingPoetryPanel
+    }
+    return PyAddSdkGroupPanel(PoetryBundle.messagePointer("python.add.sdk.panel.name.poetry.environment"),
+            PythonIcons.Python.Virtualenv, panels, defaultPanel)
+}
+
+
+fun detectPoetryEnvs(module: Module?, existingSdks: List<Sdk>, context: UserDataHolder, projectPath: String?): List<PyDetectedSdk> {
+    if (projectPath == null) return emptyList()
+    val existingSdkPaths = existingSdks.mapNotNull { it.homePath }.toSet()
+    return getPoetryEnvs(projectPath).filterNot { existingSdkPaths.contains(getPythonExecutable(it)) }.map { PyDetectedSdk(it) }
+}
+
+fun getPoetryEnvs(projectPath: String): List<String> =
+        syncRunPoetry(projectPath, "env", "list", "--full-path", defaultResult = emptyList()) { result ->
+            result.lineSequence().mapNotNull { it.split(" ")[0] }.filterNot { it.isEmpty() }.toList()
+        }
+
+
+fun isVirtualEnvsInProject(projectPath: String): Boolean? =
+        syncRunPoetry(projectPath, "config", "virtualenvs.in-project", defaultResult = null) {
+            it.trim() == "true"
+        }
+
+
+inline fun <reified T> syncRunPoetry(projectPath: @SystemDependent String, vararg args: String, defaultResult: T, crossinline callback: (String) -> T): T {
+    return try {
+        ApplicationManager.getApplication().executeOnPooledThread<T> {
+            try {
+                val result = runPoetry(projectPath, *args)
+                callback(result)
+            } catch (e: PyExecutionException) {
+                defaultResult
+            }
+        }.get(10, TimeUnit.SECONDS)
+    } catch (e: TimeoutException) {
+        defaultResult
+    }
+}
+
+fun getPythonExecutable(homePath: String): String =
+        PythonSdkUtil.getPythonExecutable(homePath) ?: FileUtil.join(homePath, "bin", "python")

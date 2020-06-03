@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.0.10</version>
+    <version>0.0.11</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.0.11</h2>
+    <p>Features</p>
+    <ul>
+        <li>Support adding existing env [#48] </li>
+    </ul>
     <h2>version 0.0.10</h2>
     <p>Features</p>
     <ul>
@@ -82,8 +87,10 @@
 
     <h2>Features</h2>
     <h3>Implemented</h3>
-    <li>add/create a poetry environment as Python SDK</li>
-    <li>create a new pyproject.toml when it does not exists</li>
+    <li>add a new/existing poetry environment as a interpreter </li>
+    <li>install packages with pyproject.toml when add a interpreter</li>
+    <li>add a new pyproject.toml when it does not exists</li>
+    <li>install and import a package with poetry (QuickFix)</li>
     <li>install packages from poetry.lock</li>
     <li>update and lock with a popup</li>
     <li>show a message and a link to fix settings (QuickFix)</li>

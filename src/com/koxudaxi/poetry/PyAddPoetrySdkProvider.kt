@@ -16,10 +16,10 @@ import com.jetbrains.python.sdk.add.PyAddSdkProvider
  */
 
 class PyAddPoetrySdkProvider : PyAddSdkProvider {
-  override fun createView(project: Project?,
-                          module: Module?,
-                          newProjectPath: String?,
-                          existingSdks: List<Sdk>,
-                          context: UserDataHolder) =
-    PyAddPoetryPanel(project, module, existingSdks, newProjectPath, context)
+    override fun createView(project: Project?,
+                            module: Module?,
+                            newProjectPath: String?,
+                            existingSdks: List<Sdk>,
+                            context: UserDataHolder) =
+            createPoetryPanel(project, module, existingSdks, newProjectPath, context)
 }
