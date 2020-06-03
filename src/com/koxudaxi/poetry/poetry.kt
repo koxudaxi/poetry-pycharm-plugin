@@ -40,16 +40,13 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.UserDataHolder
-import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.StandardFileSystems
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.PsiElement
 import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.util.PathUtil
 import com.intellij.util.PlatformUtils
-import com.jetbrains.python.PyBundle
 import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
@@ -62,7 +59,6 @@ import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
-import org.jetbrains.kotlin.tools.projectWizard.core.toResult
 import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -72,6 +68,7 @@ const val PY_PROJECT_TOML: String = "pyproject.toml"
 const val POETRY_LOCK: String = "poetry.lock"
 const val POETRY_DEFAULT_SOURCE_URL: String = "https://pypi.org/simple"
 const val POETRY_PATH_SETTING: String = "PyCharm.Poetry.Path"
+const val REPLACE_PYTHIN_VERSION = """'import re;f=open("pyproject.toml", "r+");f.write(re.sub(r"\npython = [^\n]*", "\npython = \"*\"", f.read()))'"""
 
 // TODO: Provide a special icon for poetry
 // TODO: Need a extension point
@@ -193,8 +190,11 @@ fun setupPoetrySdkUnderProgress(project: Project?,
  */
 fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPackages: Boolean, init: Boolean): @SystemDependent String {
     if (init) {
-        python?.let { runPoetry(projectPath, "env", "use", it) }
         runPoetry(projectPath, *listOf("init", "-n").toTypedArray())
+        if (python != null){
+            // Replace python version in toml
+            runCommand(projectPath, python,"-c", REPLACE_PYTHIN_VERSION)
+        }
     }
     when {
         installPackages -> {
@@ -250,6 +250,25 @@ fun runPoetry(projectPath: @SystemDependent String, vararg args: String): String
                 throw RunCanceledByUserException()
             exitCode != 0 ->
                 throw PyExecutionException("Error Running Poetry", executable, args.asList(),
+                        stdout, stderr, exitCode, emptyList())
+            else -> stdout
+        }
+    }
+}
+
+fun runCommand(projectPath: @SystemDependent String, command: String, vararg args: String): String {
+    val commandLine = GeneralCommandLine(listOf(command) + args).withWorkDirectory(projectPath)
+    val handler = CapturingProcessHandler(commandLine)
+
+    val result = with(handler) {
+        runProcess()
+    }
+    return with(result) {
+        when {
+            isCancelled ->
+                throw RunCanceledByUserException()
+            exitCode != 0 ->
+                throw PyExecutionException("Error Running", command, args.asList(),
                         stdout, stderr, exitCode, emptyList())
             else -> stdout
         }
