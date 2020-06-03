@@ -68,7 +68,7 @@ const val PY_PROJECT_TOML: String = "pyproject.toml"
 const val POETRY_LOCK: String = "poetry.lock"
 const val POETRY_DEFAULT_SOURCE_URL: String = "https://pypi.org/simple"
 const val POETRY_PATH_SETTING: String = "PyCharm.Poetry.Path"
-const val REPLACE_PYTHIN_VERSION = """'import re;f=open("pyproject.toml", "r+");f.write(re.sub(r"\npython = [^\n]*", "\npython = \"*\"", f.read()))'"""
+const val REPLACE_PYTHON_VERSION = """import re,sys;f=open("pyproject.toml", "r+");orig=f.read();f.seek(0);f.write(re.sub(r"(python = \"\^)[^\"]+(\")", "\g<1>"+sys.version.split()[0]+"\g<2>", orig))"""
 
 // TODO: Provide a special icon for poetry
 // TODO: Need a extension point
@@ -193,7 +193,7 @@ fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPa
         runPoetry(projectPath, *listOf("init", "-n").toTypedArray())
         if (python != null){
             // Replace python version in toml
-            runCommand(projectPath, python,"-c", REPLACE_PYTHIN_VERSION)
+            runCommand(projectPath, python,"-c", REPLACE_PYTHON_VERSION)
         }
     }
     when {
