@@ -11,6 +11,7 @@ import com.intellij.execution.RunCanceledByUserException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.NotificationDisplayType
@@ -59,6 +60,7 @@ import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
+import org.jetbrains.kotlin.utils.KotlinPathsFromHomeDir
 import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -123,10 +125,13 @@ var PropertiesComponent.poetryPath: @SystemDependent String?
  */
 fun detectPoetryExecutable(): File? {
     val name = when {
-        SystemInfo.isWindows -> "poetry.exe"
+        SystemInfo.isWindows -> "poetry.bat"
         else -> "poetry"
     }
-    return PathEnvironmentVariableUtil.findInPath(name)
+    return PathEnvironmentVariableUtil.findInPath(name) ?:
+    System.getProperty("user.home")?.let {homePath ->
+        File(homePath + File.separator + ".poetry" + File.separator + "bin" + File.separator + name).takeIf { it.exists() }
+    }
 }
 
 /**
@@ -608,6 +613,8 @@ inline fun <reified T> syncRunPoetry(projectPath: @SystemDependent String, varar
                 val result = runPoetry(projectPath, *args)
                 callback(result)
             } catch (e: PyExecutionException) {
+                defaultResult
+            } catch (e: ProcessNotCreatedException) {
                 defaultResult
             }
         }.get(10, TimeUnit.SECONDS)
