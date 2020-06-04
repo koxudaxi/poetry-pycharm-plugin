@@ -9,6 +9,10 @@
     <ul>
         <li>Support adding existing env [#48] </li>
     </ul>
+    <p>Improvements</p>
+    <ul>
+        <li>Improve supporting windows [#51]</li>
+    </ul>
     <h2>version 0.0.10</h2>
     <p>Features</p>
     <ul>
