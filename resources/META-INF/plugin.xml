@@ -9,6 +9,10 @@
     <ul>
         <li>Support adding existing env [#48] </li>
     </ul>
+    <p>Improvements</p>
+    <ul>
+        <li>Improve supporting windows [#51]</li>
+    </ul>
     <p>Bug fixes</p>
     <ul>
         <li>fix detecting poetry envs [#50] </li>
