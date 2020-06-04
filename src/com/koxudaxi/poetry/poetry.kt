@@ -591,7 +591,11 @@ fun createPoetryPanel(project: Project?,
 fun detectPoetryEnvs(module: Module?, existingSdks: List<Sdk>, context: UserDataHolder, projectPath: String?): List<PyDetectedSdk> {
     if (projectPath == null) return emptyList()
     val existingSdkPaths = existingSdks.mapNotNull { it.homePath }.toSet()
-    return getPoetryEnvs(projectPath).filterNot { existingSdkPaths.contains(getPythonExecutable(it)) }.map { PyDetectedSdk(it) }
+    return try {
+        getPoetryEnvs(projectPath).filterNot { existingSdkPaths.contains(getPythonExecutable(it)) }.map { PyDetectedSdk(it) }
+    } catch (e: Throwable) {
+        emptyList()
+    }
 }
 
 fun getPoetryEnvs(projectPath: String): List<String> =

@@ -13,6 +13,10 @@
     <ul>
         <li>Improve supporting windows [#51]</li>
     </ul>
+    <p>Bug fixes</p>
+    <ul>
+        <li>fix detecting poetry envs [#50] </li>
+    </ul>
     <h2>version 0.0.10</h2>
     <p>Features</p>
     <ul>
