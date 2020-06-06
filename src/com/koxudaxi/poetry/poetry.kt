@@ -256,7 +256,7 @@ fun runPoetry(projectPath: @SystemDependent String, vararg args: String): String
             exitCode != 0 ->
                 throw PyExecutionException("Error Running Poetry", executable, args.asList(),
                         stdout, stderr, exitCode, emptyList())
-            else -> stdout
+            else -> stdout.trim()
         }
     }
 }
