@@ -1,9 +1,15 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.0.11</version>
+    <version>0.0.12</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.0.12</h2>
+    <p>Bug fixes</p>
+    <ul>
+    <li>Create new windows interpreter [#53] by @akinnear</li>
+    Thanks to @akinnear
+    </ul>
     <h2>version 0.0.11</h2>
     <p>Features</p>
     <ul>
