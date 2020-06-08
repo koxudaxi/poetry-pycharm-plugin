@@ -33,13 +33,9 @@ jobs:
       with: 
         ide-versions: |
             ideaIC:2020.1
-            ideaIU:2020.1
             pycharmPC:2020.1
-            pycharmPY:2020.1
             ideaIC:LATEST-EAP-SNAPSHOT
-            ideaIU:LATEST-EAP-SNAPSHOT
             pycharmPC:LATEST-EAP-SNAPSHOT
-            pycharmPY:LATEST-EAP-SNAPSHOT
     - name: setup python
       uses: actions/setup-python@v1
       with:
