@@ -4,6 +4,11 @@
     <version>0.0.13</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.0.13</h2>
+    <p>Bug fixes</p>
+    <ul>
+        <li>Fix invalid notification to install packages [#62] </li>
+    </ul>
     <h2>version 0.0.12</h2>
     <p>Bug fixes</p>
     <ul>
