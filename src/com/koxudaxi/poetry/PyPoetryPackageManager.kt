@@ -101,7 +101,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         if (alwaysRefresh || packages == null) {
             packages = null
             val output = try {
-                runPoetry(sdk, "install", "--dry-run")
+                runPoetry(sdk, "install", "--dry-run", "--no-root")
             } catch (e: ExecutionException) {
                 packages = emptyList()
                 return packages ?: emptyList()
