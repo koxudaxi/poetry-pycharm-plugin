@@ -18,7 +18,7 @@ This plugin supports minimum [features](#features) to use poetry in PyCharm.
 
 There is [feature restrictions](#feature-restrictions).
 
-But, PyCharm team will add a few api to resolve the problem. The detail is in [this issue](https://github.com/koxudaxi/poetry-pycharm-plugin/issues/58)
+But, PyCharm team will add a few api to resolve the problem. The detail is in [this issue](https://github.com/koxudaxi/poetry-pycharm-plugin/issues/58).
 
 The project needs any feedback and PRs. We're waiting for your feedback and PRs.
 
