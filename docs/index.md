@@ -41,6 +41,11 @@ You can install the stable version on PyCharm's `Marketplace` (Preference -> Plu
 - install extras by clicking a line marker ([Toml plugin](https://plugins.jetbrains.com/plugin/8195-toml) is required)
 
 
+## Workaround
+If the plugin does not detect your poetry environment after changing the environment, then please re-open the project.
+
+I think this problem will be resolved by extension points in the future. 
+
 ## Feature Restrictions  
 The plugin can't provide some features for technical reasons.
 

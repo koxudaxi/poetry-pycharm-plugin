@@ -43,6 +43,11 @@ You can install the stable version on PyCharm's `Marketplace` (Preference -> Plu
 - show a message and a link to fix settings (QuickFix)
 - install extras by clicking a line marker ([Toml plugin](https://plugins.jetbrains.com/plugin/8195-toml) is required)
 
+## Workaround
+If the plugin does not detect your poetry environment after changing the environment, then please re-open the project.
+
+I think this problem will be resolved by extension points in the future. 
+
 ## Feature Restrictions  
 The plugin can't provide some features for technical reasons.
 
@@ -54,7 +59,6 @@ We will be able to implement the following features when JetBrains add extension
 - Use the Custom Icon for poetry.
 - Install/uninstall a package from GUI(settings)
 - And more.
-
 
 ## Motivation
 Poetry is a popular package manager of python.
