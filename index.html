@@ -268,8 +268,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#todo" class="md-nav__link">
-    TODO
+  <a href="#workaround" class="md-nav__link">
+    Workaround
   </a>
   
 </li>
@@ -419,8 +419,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#todo" class="md-nav__link">
-    TODO
+  <a href="#workaround" class="md-nav__link">
+    Workaround
   </a>
   
 </li>
@@ -489,9 +489,10 @@
 <h2 id="demo">Demo<a class="headerlink" href="#demo" title="Permanent link">🔗</a></h2>
 <p><img alt="poetry_demo1" src="https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/poetry_demo1.gif" /></p>
 <h2 id="this-project-is-currently-in-an-experimental-phase">This project is currently in an experimental phase<a class="headerlink" href="#this-project-is-currently-in-an-experimental-phase" title="Permanent link">🔗</a></h2>
-<p><em>This project was started on 10 May 2020. Now, a very experimental phase.</em>
-<em>Therefore, please be careful when using the plugin.</em>
-<em>Also, The project needs any feedback and PRs. We're waiting for your feedback and PRs.</em></p>
+<p>This plugin supports minimum <a href="#features">features</a> to use poetry in PyCharm.</p>
+<p>There is <a href="#feature-restrictions">feature restrictions</a>.</p>
+<p>But, PyCharm team will add a few api to resolve the problem. The detail is in <a href="https://github.com/koxudaxi/poetry-pycharm-plugin/issues/58">this issue</a>.</p>
+<p>The project needs any feedback and PRs. We're waiting for your feedback and PRs.</p>
 <h2 id="quick-installation">Quick Installation<a class="headerlink" href="#quick-installation" title="Permanent link">🔗</a></h2>
 <p>The plugin is in JetBrains repository (<a href="https://plugins.jetbrains.com/plugin/14307-poetry">Poetry Plugin Page</a>)</p>
 <p>You can install the stable version on PyCharm's <code>Marketplace</code> (Preference -&gt; Plugins -&gt; Marketplace) <a href="https://www.jetbrains.com/help/idea/managing-plugins.html">Official Document</a></p>
@@ -509,11 +510,9 @@
 <li>show a message and a link to fix settings (QuickFix)</li>
 <li>install extras by clicking a line marker (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
 </ul>
-<h2 id="todo">TODO<a class="headerlink" href="#todo" title="Permanent link">🔗</a></h2>
-<ul>
-<li>add actions on context-menu</li>
-<li>document</li>
-</ul>
+<h2 id="workaround">Workaround<a class="headerlink" href="#workaround" title="Permanent link">🔗</a></h2>
+<p>If the plugin does not detect your poetry environment after changing the environment, then please re-open the project.</p>
+<p>I think this problem will be resolved by extension points in the future. </p>
 <h2 id="feature-restrictions">Feature Restrictions<a class="headerlink" href="#feature-restrictions" title="Permanent link">🔗</a></h2>
 <p>The plugin can't provide some features for technical reasons.</p>
 <p>Because PyCharm has not provided APIs to support third-party python package managers yet. (a.k.a <a href="https://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_extensions.html">extension points</a>) </p>
