@@ -11,9 +11,13 @@
 
 
 ## This project is currently in an experimental phase
-*This project was started on 10 May 2020. Now, a very experimental phase.*
-*Therefore, please be careful when using the plugin.*
-*Also, The project needs any feedback and PRs. We're waiting for your feedback and PRs.*
+This plugin supports minimum [features](#features) to use poetry in PyCharm.
+
+There is [feature restrictions](#feature-restrictions).
+
+But, PyCharm team will add a few api to resolve the problem. The detail is in [this issue](https://github.com/koxudaxi/poetry-pycharm-plugin/issues/58).
+
+The project needs any feedback and PRs. We're waiting for your feedback and PRs.
 
 ## Quick Installation
 
@@ -36,9 +40,11 @@ You can install the stable version on PyCharm's `Marketplace` (Preference -> Plu
 - show a message and a link to fix settings (QuickFix)
 - install extras by clicking a line marker ([Toml plugin](https://plugins.jetbrains.com/plugin/8195-toml) is required)
 
-## TODO 
-- add actions on context-menu
-- document
+
+## Workaround
+If the plugin does not detect your poetry environment after changing the environment, then please re-open the project.
+
+I think this problem will be resolved by extension points in the future. 
 
 ## Feature Restrictions  
 The plugin can't provide some features for technical reasons.
