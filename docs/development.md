@@ -21,8 +21,18 @@ $ gradlew.bat buildPlugin
 $ ./gradlew runIde
 ```
 
+## Unittest
+You should add a unittest for the new code. But, This plugin do complex behavior to modules.
+
+You may feel writing unittest difficult.
+
+We should write a unittest as much as possible.
+
+Unittest is not blocker for PRs.
 
 ## License For JetBrains' Code
 These files are forked from [IntelliJ IDEA Community Edition](https://github.com/JetBrains/intellij-community)
+
 The files are licensed under the Apache License, Version 2.0.
+
 http://www.apache.org/licenses/LICENSE-2.0
