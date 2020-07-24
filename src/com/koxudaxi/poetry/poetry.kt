@@ -173,7 +173,13 @@ fun setupPoetrySdkUnderProgress(project: Project?,
         }
     }
 
-    val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)})"
+    val pythonVersion = ReadAction.compute<String, Throwable> {
+         when (python) {
+            is String -> runCommand(FileUtil.toSystemDependentName(projectPath), python, "-V")
+            else -> runPoetry(FileUtil.toSystemDependentName(projectPath), "run", "python", "-V")
+        }.trim()
+    }
+    val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)}) $pythonVersion"
     return createSdkByGenerateTask(task, existingSdks, null, projectPath, suggestedName)?.apply {
         associateWithModule(module ?: project?.modules?.firstOrNull(), newProjectPath)
         project?.let { project ->
