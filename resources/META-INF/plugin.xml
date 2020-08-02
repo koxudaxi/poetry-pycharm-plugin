@@ -152,6 +152,9 @@
         <action id="poetryInstallExtras" class="com.koxudaxi.poetry.PoetryInstallExtras" text="Install Packages"
                 description="Poetry install extras packages">
         </action>
+        <action id="poetryRunScript" class="com.koxudaxi.poetry.PoetryRunScript" text="Run Scripts"
+                description="Poetry run scripts">
+        </action>
     </actions>
 </idea-plugin>
 

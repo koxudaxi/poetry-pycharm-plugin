@@ -1,0 +1,31 @@
+package com.koxudaxi.poetry
+
+import com.intellij.execution.lineMarker.RunLineMarkerContributor
+import com.intellij.icons.AllIcons.Actions.Execute
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.psi.PsiElement
+import com.jetbrains.python.sdk.pythonSdk
+import org.toml.lang.psi.*
+
+object PoetryScriptsLineMarkerContributor : RunLineMarkerContributor() {
+    override fun getInfo(element: PsiElement): Info? {
+        val sdk = element.project.pythonSdk ?: return null
+        if (!isPoetry(element.project, sdk)) return null
+        try {
+            if (element !is TomlKey) return null
+        } catch (e: NoClassDefFoundError) {
+            return null //Toml plugin is installed. But, PyCharm has not restarted yet.
+        }
+        val keyValue = element.parent as? TomlKeyValue ?: return null
+        val names = (keyValue.parent as? TomlTable)?.header?.names ?: return null
+        if (names.joinToString(".") { it.text } != "tool.poetry.scripts") return null
+        if (keyValue.key.text == null) return null
+        val value = keyValue.value as? TomlLiteral ?: return null
+        if (value.textLength < 3) return null
+        val action = ActionManager.getInstance().getAction(PoetryRunScript.actionID)
+        return Info(Execute, { parameter ->  "Run " + ((parameter as? TomlKey)?.text ?: "script")}, arrayOf(action))
+    }
+}
+
+
+
