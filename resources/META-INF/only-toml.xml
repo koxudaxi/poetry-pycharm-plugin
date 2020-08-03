@@ -2,5 +2,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <runLineMarkerContributor language="TOML"
                                   implementationClass="com.koxudaxi.poetry.PoetryExtrasLineMarkerContributor"/>
+        <runLineMarkerContributor language="TOML"
+                                  implementationClass="com.koxudaxi.poetry.PoetryScriptsLineMarkerContributor"/>
+
     </extensions>
 </idea-plugin>

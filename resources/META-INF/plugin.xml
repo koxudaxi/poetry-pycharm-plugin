@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.1.1</h2>
+    <p>Features</p>
+    <ul>
+        <li>Support script [#81]</li>
+    </ul>
     <h2>version 0.1.0</h2>
     <p>Features</p>
     <ul>
@@ -137,6 +142,10 @@
         <localInspection language="Python" shortName="PoetryUnresolvedReferencesInspection" suppressId="PoetryUnresolvedReferences" bundle="messages.PoetryPsiBundle" key="INSP.NAME.unresolved.refs" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryUnresolvedReferencesInspection" order="first"/>
         <applicationService serviceInterface="com.koxudaxi.poetry.PyPoetryPackageManagers"
                             serviceImplementation="com.koxudaxi.poetry.PyPoetryPackageManagersImpl"/>
+        <toolWindow id="Poetry"
+                    anchor="bottom"
+                    factoryClass="com.koxudaxi.poetry.PoetryToolWindow"/>
+
     </extensions>
     <projectListeners>
         <listener class="com.koxudaxi.poetry.PoetryPackageManagerListener"
@@ -151,6 +160,9 @@
     <actions>
         <action id="poetryInstallExtras" class="com.koxudaxi.poetry.PoetryInstallExtras" text="Install Packages"
                 description="Poetry install extras packages">
+        </action>
+        <action id="poetryRunScript" class="com.koxudaxi.poetry.PoetryRunScript" text="Run Scripts"
+                description="Poetry run scripts">
         </action>
     </actions>
 </idea-plugin>
