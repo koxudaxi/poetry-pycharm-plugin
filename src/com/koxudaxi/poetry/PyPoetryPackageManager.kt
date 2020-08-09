@@ -28,6 +28,8 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
 
     private var requirements: List<PyRequirement>? = null
 
+    private var outdatedPackages: Map<String, PoetryOutdatedVersion> = emptyMap()
+
     init {
         PyPackageUtil.runOnChangeUnderInterpreterPaths(sdk) {
             PythonSdkType.getInstance().setupSdkPaths(sdk)
@@ -93,6 +95,8 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
 
     fun getRequirements() = requirements
 
+    fun getOutdatedPackages() = outdatedPackages
+
     override fun refreshAndGetPackages(alwaysRefresh: Boolean): List<PyPackage> {
         return refreshAndGetPackages(alwaysRefresh, true)
     }
@@ -100,15 +104,25 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     fun refreshAndGetPackages(alwaysRefresh: Boolean, notify: Boolean): List<PyPackage> {
         if (alwaysRefresh || packages == null) {
             packages = null
-            val output = try {
+            val outputInstallDryRun = try {
                 runPoetry(sdk, "install", "--dry-run", "--no-root")
             } catch (e: ExecutionException) {
                 packages = emptyList()
                 return packages ?: emptyList()
             }
-            val allPackage = parsePoetryInstallDryRun(output)
+            val allPackage = parsePoetryInstallDryRun(outputInstallDryRun)
             packages = allPackage.first
             requirements = allPackage.second
+
+            val outputOutdatedPackages = try {
+                runPoetry(sdk, "show", "--outdated")
+            } catch (e: ExecutionException) {
+                outdatedPackages = emptyMap()
+            }
+            if (outputOutdatedPackages is String) {
+                outdatedPackages = parsePoetryShowOutdated(outputOutdatedPackages)
+            }
+
             if (notify) {
                 ApplicationManager.getApplication().messageBus.syncPublisher(PACKAGE_MANAGER_TOPIC).packagesRefreshed(sdk)
             }

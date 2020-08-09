@@ -1,0 +1,5 @@
+boto3    1.13.26 1.14.38 The AWS SDK for Python
+botocore 1.16.26 1.17.38 Low-level, data-driven core of boto 3.
+docutils 0.15.2  0.16    Docutils -- Python Documentation Utilities
+pydantic 1.4     1.6.1   Data validation and settings management using python 3.6 type hinting
+
