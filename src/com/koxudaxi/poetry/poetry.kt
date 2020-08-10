@@ -60,11 +60,11 @@ import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
-import org.jetbrains.kotlin.utils.KotlinPathsFromHomeDir
 import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import java.util.regex.Pattern
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
 const val POETRY_LOCK: String = "poetry.lock"
@@ -635,3 +635,20 @@ inline fun <reified T> syncRunPoetry(projectPath: @SystemDependent String, varar
 
 fun getPythonExecutable(homePath: String): String =
         PythonSdkUtil.getPythonExecutable(homePath) ?: FileUtil.join(homePath, "bin", "python")
+
+/**
+ * Parses the output of `poetry show --outdated` into a list of packages.
+ */
+fun parsePoetryShowOutdated(input: String): Map<String, PoetryOutdatedVersion> {
+    return input
+            .lines()
+            .mapNotNull  { line ->
+                line.split(Pattern.compile(" +"))
+                        .takeIf { it.size > 3 }?.let { it[0] to PoetryOutdatedVersion(it[1], it[2]) }
+            }.toMap()
+}
+
+
+data class PoetryOutdatedVersion(
+        @SerializedName("currentVersion") var currentVersion: String,
+        @SerializedName("latestVersion") var latestVersion: String)
