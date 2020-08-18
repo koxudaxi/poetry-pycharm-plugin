@@ -26,9 +26,10 @@ intellij {
     updateSinceUntilBuild false
     downloadSources true
     plugins "java", "Kotlin", "PythonCore:$python_core_version", "org.toml.lang:$toml_version"
-    alternativeIdePath "/opt/JetBrains/pycharm-community-2020.1" // Change with the path to your IntelliJ CE installation directory
+    alternativeIdePath "/Applications/IntelliJ IDEA CE.app/Contents" // Change with the path to your IntelliJ CE installation directory
+}
 
-patchPluginXml{
+patchPluginXml {
     sinceBuild "201.*"
     untilBuild "202.*"
 }
@@ -61,7 +62,7 @@ allprojects {
     dependencies {
         testImplementation 'junit:junit:4.13'
         implementation "org.apache.tuweni:tuweni-toml:$tuweni_toml_version"
-        compile 'org.jetbrains:annotations:20.0.0'
+        compile "org.jetbrains:annotations:20.0.0"
     }
 
     jacocoTestReport {
