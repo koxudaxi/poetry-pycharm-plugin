@@ -28,6 +28,9 @@ intellij {
     plugins "java", "Kotlin", "PythonCore:$python_core_version", "org.toml.lang:$toml_version"
     alternativeIdePath "/opt/JetBrains/pycharm-community-2020.1" // Change with the path to your IntelliJ CE installation directory
 
+patchPluginXml{
+    sinceBuild "201.*"
+    untilBuild "202.*"
 }
 
 allprojects {
