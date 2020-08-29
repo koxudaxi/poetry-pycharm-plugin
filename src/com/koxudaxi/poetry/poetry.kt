@@ -60,7 +60,6 @@ import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
-import org.jetbrains.kotlin.utils.getOrPutNullable
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -98,7 +97,7 @@ val Module.pyProjectToml: VirtualFile?
     get() =
         baseDir?.findChild(PY_PROJECT_TOML)?.let { virtualFile ->
             (this.name + virtualFile.path).let { key ->
-                pyProjectTomlCache.getOrPutNullable(key, { getPyProjectTomlForPoetry(virtualFile) }).let { pair ->
+                pyProjectTomlCache.getOrPut(key, { getPyProjectTomlForPoetry(virtualFile) }).let { pair ->
                     when (virtualFile.modificationStamp) {
                         pair.first -> pair.second
                         else -> pyProjectTomlCache.put(key, getPyProjectTomlForPoetry(virtualFile))?.second

@@ -3,7 +3,7 @@ package com.koxudaxi.poetry
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.impl.local.LocalFileSystemImpl
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.jetbrains.kotlin.konan.file.File
+import java.io.File
 
 abstract class PoetryTestCase : BasePlatformTestCase() {
     protected open val testClassName: String = this.javaClass.simpleName.replace("Test", "")
