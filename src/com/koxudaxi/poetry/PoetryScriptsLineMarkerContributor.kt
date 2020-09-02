@@ -1,11 +1,15 @@
 package com.koxudaxi.poetry
 
+
 import com.intellij.execution.lineMarker.RunLineMarkerContributor
 import com.intellij.icons.AllIcons.Actions.Execute
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.sdk.pythonSdk
-import org.toml.lang.psi.*
+import org.toml.lang.psi.TomlKey
+import org.toml.lang.psi.TomlKeyValue
+import org.toml.lang.psi.TomlLiteral
+import org.toml.lang.psi.TomlTable
 
 object PoetryScriptsLineMarkerContributor : RunLineMarkerContributor() {
     override fun getInfo(element: PsiElement): Info? {
@@ -23,7 +27,8 @@ object PoetryScriptsLineMarkerContributor : RunLineMarkerContributor() {
         val value = keyValue.value as? TomlLiteral ?: return null
         if (value.textLength < 3) return null
         val action = ActionManager.getInstance().getAction(PoetryRunScript.actionID)
-        return Info(Execute, { parameter ->  "Run " + ((parameter as? TomlKey)?.text ?: "script")}, arrayOf(action))
+        action.templatePresentation.text = "Run '${keyValue.key.text}'"
+        return Info(Execute, { parameter -> "Run '${((parameter as? TomlKey)?.text ?: "script")}'" }, arrayOf(action))
     }
 }
 
