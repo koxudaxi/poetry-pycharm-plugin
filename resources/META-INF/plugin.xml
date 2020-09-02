@@ -153,10 +153,6 @@
         <localInspection language="Python" shortName="PoetryUnresolvedReferencesInspection" suppressId="PoetryUnresolvedReferences" bundle="messages.PoetryPsiBundle" key="INSP.NAME.unresolved.refs" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryUnresolvedReferencesInspection" order="first"/>
         <applicationService serviceInterface="com.koxudaxi.poetry.PyPoetryPackageManagers"
                             serviceImplementation="com.koxudaxi.poetry.PyPoetryPackageManagersImpl"/>
-        <toolWindow id="Poetry"
-                    anchor="bottom"
-                    factoryClass="com.koxudaxi.poetry.PoetryToolWindow"/>
-
     </extensions>
     <projectListeners>
         <listener class="com.koxudaxi.poetry.PoetryPackageManagerListener"
