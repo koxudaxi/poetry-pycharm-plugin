@@ -140,7 +140,7 @@
     <li>document</li>
     ]]></description>
 
-    <idea-version since-build="201.*" until-build="202.*"/>
+    <idea-version since-build="202.7319.37" until-build="202.*"/>
 
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.python</depends>
@@ -154,13 +154,15 @@
         <applicationService serviceInterface="com.koxudaxi.poetry.PyPoetryPackageManagers"
                             serviceImplementation="com.koxudaxi.poetry.PyPoetryPackageManagersImpl"/>
     </extensions>
-    <projectListeners>
-        <listener class="com.koxudaxi.poetry.PoetryPackageManagerListener"
-                  topic="com.jetbrains.python.packaging.PyPackageManager$Listener"/>
-    </projectListeners>
+<!--    <projectListeners>-->
+<!--        <listener class="com.koxudaxi.poetry.PoetryPackageManagerListener"-->
+<!--                  topic="com.jetbrains.python.packaging.PyPackageManager$Listener"/>-->
+<!--    </projectListeners>-->
     <extensions defaultExtensionNs="Pythonid">
         <pyAddSdkProvider implementation="com.koxudaxi.poetry.PyAddPoetrySdkProvider"/>
         <pythonFlavorProvider implementation="com.koxudaxi.poetry.PyPoetrySdkFlavorProvider"/>
+        <pySdkProvider implementation="com.koxudaxi.poetry.PoetrySdkProvider"/>
+        <packageManagerProvider implementation="com.koxudaxi.poetry.PyPoetryPackageManagerProvider"/>
     </extensions>
 
     <resource-bundle/>

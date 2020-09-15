@@ -52,6 +52,7 @@ import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.sdk.add.*
+import com.jetbrains.python.sdk.flavors.PythonSdkFlavor
 import com.jetbrains.python.statistics.modules
 import icons.PythonIcons
 import org.apache.tuweni.toml.Toml
@@ -221,6 +222,26 @@ fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPa
 fun isPoetry(project: Project, sdk: Sdk): Boolean {
     return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains(sdk.homePath)
 }
+
+var Sdk.isPoetry: Boolean
+    get() = sdkAdditionalData is PyPoetrySdkAdditionalData
+    set(value) {
+        val oldData = sdkAdditionalData
+        val newData = if (value) {
+            when (oldData) {
+                is PythonSdkAdditionalData -> PyPoetrySdkAdditionalData(oldData)
+                else -> PyPoetrySdkAdditionalData()
+            }
+        } else {
+            when (oldData) {
+                is PyPoetrySdkAdditionalData -> PythonSdkAdditionalData(PythonSdkFlavor.getFlavor(this))
+                else -> oldData
+            }
+        }
+        val modificator = sdkModificator
+        modificator.sdkAdditionalData = newData
+        ApplicationManager.getApplication().runWriteAction { modificator.commitChanges() }
+    }
 
 /**
  * Runs the configured poetry for the specified Poetry SDK with the associated project path.
