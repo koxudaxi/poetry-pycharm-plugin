@@ -1,7 +1,6 @@
 // Copyright 2000-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 package com.koxudaxi.poetry
 
-import PoetryPackageManagerUI
 import com.google.gson.annotations.SerializedName
 import com.intellij.CommonBundle
 import com.intellij.codeInspection.LocalQuickFix
@@ -64,6 +63,7 @@ import org.jetbrains.annotations.TestOnly
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import java.util.function.Supplier
 import java.util.regex.Pattern
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
@@ -128,8 +128,7 @@ fun detectPoetryExecutable(): File? {
         SystemInfo.isWindows -> "poetry.bat"
         else -> "poetry"
     }
-    return PathEnvironmentVariableUtil.findInPath(name) ?:
-    System.getProperty("user.home")?.let {homePath ->
+    return PathEnvironmentVariableUtil.findInPath(name) ?: System.getProperty("user.home")?.let { homePath ->
         File(homePath + File.separator + ".poetry" + File.separator + "bin" + File.separator + name).takeIf { it.exists() }
     }
 }
@@ -175,8 +174,8 @@ fun setupPoetrySdkUnderProgress(project: Project?,
 
 
     val pythonVersion = when (python) {
-        is String -> ApplicationManager.getApplication().executeOnPooledThread<String> {  runCommand(FileUtil.toSystemDependentName(projectPath), python, "-V") }.get(10, TimeUnit.SECONDS)
-        else -> syncRunPoetry(FileUtil.toSystemDependentName(projectPath), "run", "python", "-V", defaultResult =  null){it}
+        is String -> ApplicationManager.getApplication().executeOnPooledThread<String> { runCommand(FileUtil.toSystemDependentName(projectPath), python, "-V") }.get(10, TimeUnit.SECONDS)
+        else -> syncRunPoetry(FileUtil.toSystemDependentName(projectPath), "run", "python", "-V", defaultResult = null) { it }
     }?.trim()
 
     val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)})"
@@ -203,9 +202,9 @@ fun setupPoetrySdkUnderProgress(project: Project?,
 fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPackages: Boolean, init: Boolean): @SystemDependent String {
     if (init) {
         runPoetry(projectPath, *listOf("init", "-n").toTypedArray())
-        if (python != null){
+        if (python != null) {
             // Replace python version in toml
-            runCommand(projectPath, python,"-c", REPLACE_PYTHON_VERSION)
+            runCommand(projectPath, python, "-c", REPLACE_PYTHON_VERSION)
         }
     }
     when {
@@ -224,6 +223,7 @@ fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPa
 fun isPoetryFromConfig(project: Project, sdk: Sdk): Boolean {
     return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains(sdk.homePath)
 }
+
 
 var Sdk.isPoetry: Boolean
     get() = sdkAdditionalData is PyPoetrySdkAdditionalData
@@ -328,10 +328,10 @@ val Sdk.poetrySources: List<String>
 /**
  * The list of requirements defined in the poetry.lock of the module associated with this SDK.
  */
-val Sdk.poetryLockRequirements: List<PyRequirement>?
-    get() {
-        return poetryLock?.let { PyPoetryPackageManager.getInstance(this).getRequirements() }
-    }
+//val Sdk.poetryLockRequirements: List<PyRequirement>?
+//    get() {
+//        return poetryLock?.let { PyPoetryPackageManager.getInstance(this).getRequirements() }
+//    }
 
 /**
  * A quick-fix for setting up the poetry for the module of the current PSI element.
@@ -390,7 +390,7 @@ class PoetryInstallQuickFix : LocalQuickFix {
             if (!sdk.isPoetry) return
             // TODO: create UI
             val listener = PyPackageRequirementsInspection.RunningPackagingTasksListener(module)
-            val ui = PoetryPackageManagerUI(project, sdk, listener)
+            val ui = PyPackageManagerUI(project, sdk, listener)
             ui.install(null, listOf())
         }
     }
@@ -492,9 +492,9 @@ private fun VirtualFile.getModule(project: Project): Module? =
 
 private val LOCK_NOTIFICATION_GROUP = NotificationGroup("$PY_PROJECT_TOML Watcher", NotificationDisplayType.STICKY_BALLOON, false)
 
-private val Sdk.packageManager: PyPoetryPackageManager
-    get() = PyPoetryPackageManager.getInstance(this)
-
+//private val Sdk.packageManager: PyPoetryPackageManager
+//    get() = PyPoetryPackageManager.getInstance(this)
+//
 
 @TestOnly
 fun getPoetryLockRequirements(virtualFile: VirtualFile, packageManager: PyPackageManager): List<PyRequirement>? {
@@ -580,10 +580,8 @@ fun runPoetryInBackground(module: Module, args: List<String>, description: Strin
                 }
             } finally {
                 PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
-                sdk.associatedModule?.baseDir?.refresh(true, false)
-                if (sdk.isPoetry) {
-                    PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true)
-                }
+                sdk.associatedModuleDir?.refresh(true, false)
+                PyPackageManager.getInstance(sdk).refreshAndGetPackages(true)
             }
         }
     }
@@ -611,7 +609,7 @@ fun createPoetryPanel(project: Project?,
         newPoetryPanel != null -> newPoetryPanel
         else -> existingPoetryPanel
     }
-    return PyAddSdkGroupPanel(PoetryBundle.messagePointer("python.add.sdk.panel.name.poetry.environment"),
+    return PyAddSdkGroupPanel(Supplier { "Poetry environment" },
             PythonIcons.Python.Virtualenv, panels, defaultPanel)
 }
 
@@ -664,7 +662,7 @@ fun getPythonExecutable(homePath: String): String =
 fun parsePoetryShowOutdated(input: String): Map<String, PoetryOutdatedVersion> {
     return input
             .lines()
-            .mapNotNull  { line ->
+            .mapNotNull { line ->
                 line.split(Pattern.compile(" +"))
                         .takeIf { it.size > 3 }?.let { it[0] to PoetryOutdatedVersion(it[1], it[2]) }
             }.toMap()

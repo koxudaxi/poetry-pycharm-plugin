@@ -88,7 +88,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     }
 
     override fun createVirtualEnv(destinationDir: String, useGlobalSite: Boolean): String {
-        throw ExecutionException("Creating virtual environments based on Pipenv environments is not supported")
+        throw ExecutionException("Creating virtual environments based on Poetry environments is not supported")
     }
 
     override fun getPackages() = packages
@@ -98,10 +98,6 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     fun getOutdatedPackages() = outdatedPackages
 
     override fun refreshAndGetPackages(alwaysRefresh: Boolean): List<PyPackage> {
-        return refreshAndGetPackages(alwaysRefresh, true)
-    }
-
-    fun refreshAndGetPackages(alwaysRefresh: Boolean, notify: Boolean): List<PyPackage> {
         if (alwaysRefresh || packages == null) {
             packages = null
             val outputInstallDryRun = try {
@@ -122,15 +118,14 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
             if (outputOutdatedPackages is String) {
                 outdatedPackages = parsePoetryShowOutdated(outputOutdatedPackages)
             }
-
-            if (notify) {
-                ApplicationManager.getApplication().messageBus.syncPublisher(PACKAGE_MANAGER_TOPIC).packagesRefreshed(sdk)
-            }
+            ApplicationManager.getApplication().messageBus.syncPublisher(PACKAGE_MANAGER_TOPIC).packagesRefreshed(sdk)
         }
         return packages ?: emptyList()
     }
 
-    override fun getRequirements(module: Module): List<PyRequirement>? = requirements
+    override fun getRequirements(module: Module): List<PyRequirement>? {
+        return requirements
+    }
 
     override fun parseRequirements(text: String): List<PyRequirement> =
             PyRequirementParser.fromText(text)
@@ -146,11 +141,11 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         return emptySet()
     }
 
-    companion object {
-        fun getInstance(sdk: Sdk): PyPoetryPackageManager {
-            return PyPoetryPackageManagers.getInstance().forSdk(sdk)
-        }
-    }
+//    companion object {
+//        fun getInstance(sdk: Sdk): PyPoetryPackageManager {
+//            return PyPoetryPackageManagers.getInstance().forSdk(sdk)
+//        }
+//    }
 
     private fun getVersion(version: String): String {
         return if (Regex("^[0-9]").containsMatchIn(version)) "==$version" else version

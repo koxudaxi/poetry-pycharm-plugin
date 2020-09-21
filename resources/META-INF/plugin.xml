@@ -149,24 +149,14 @@
     <extensions defaultExtensionNs="com.intellij">
         <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>
         <projectService serviceImplementation="com.koxudaxi.poetry.PoetryConfigService"/>
-        <localInspection language="Python" shortName="PoetryPackageRequirementsInspection" suppressId="PoetryPackageRequirements" bundle="messages.PoetryPsiBundle" displayName="Poetry Package requirements" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryPackageRequirementsInspection"/>
-        <localInspection language="Python" shortName="PoetryUnresolvedReferencesInspection" suppressId="PoetryUnresolvedReferences" bundle="messages.PoetryPsiBundle" key="INSP.NAME.unresolved.refs" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryUnresolvedReferencesInspection" order="first"/>
-        <applicationService serviceInterface="com.koxudaxi.poetry.PyPoetryPackageManagers"
-                            serviceImplementation="com.koxudaxi.poetry.PyPoetryPackageManagersImpl"/>
         <postStartupActivity implementation="com.koxudaxi.poetry.PoetryConfigLoader" order="last"/>
     </extensions>
-<!--    <projectListeners>-->
-<!--        <listener class="com.koxudaxi.poetry.PoetryPackageManagerListener"-->
-<!--                  topic="com.jetbrains.python.packaging.PyPackageManager$Listener"/>-->
-<!--    </projectListeners>-->
     <extensions defaultExtensionNs="Pythonid">
         <pyAddSdkProvider implementation="com.koxudaxi.poetry.PyAddPoetrySdkProvider"/>
         <pythonFlavorProvider implementation="com.koxudaxi.poetry.PyPoetrySdkFlavorProvider"/>
         <pySdkProvider implementation="com.koxudaxi.poetry.PoetrySdkProvider"/>
         <packageManagerProvider implementation="com.koxudaxi.poetry.PyPoetryPackageManagerProvider"/>
     </extensions>
-
-    <resource-bundle/>
     <actions>
         <action id="poetryInstallExtras" class="com.koxudaxi.poetry.PoetryInstallExtras" text="Install Packages"
                 description="Poetry install extras packages">
