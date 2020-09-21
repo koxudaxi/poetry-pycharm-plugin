@@ -8,7 +8,7 @@ import com.jetbrains.python.sdk.associatedModule
 class PoetryPackageManagerListener : PyPackageManager.Listener {
     override fun packagesRefreshed(sdk: Sdk) {
         val module = sdk.associatedModule ?: return
-        if (!isPoetry(module.project, sdk)) return
+        if (!sdk.isPoetry) return
         ApplicationManager.getApplication().invokeLater {
             ApplicationManager.getApplication().executeOnPooledThread {
                 if (module.pyProjectToml == null) return@executeOnPooledThread

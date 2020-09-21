@@ -14,7 +14,7 @@ import org.toml.lang.psi.TomlTable
 object PoetryScriptsLineMarkerContributor : RunLineMarkerContributor() {
     override fun getInfo(element: PsiElement): Info? {
         val sdk = element.project.pythonSdk ?: return null
-        if (!isPoetry(element.project, sdk)) return null
+        if (!sdk.isPoetry) return null
         try {
             if (element !is TomlKey) return null
         } catch (e: NoClassDefFoundError) {

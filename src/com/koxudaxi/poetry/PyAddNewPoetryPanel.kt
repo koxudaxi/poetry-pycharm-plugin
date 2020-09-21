@@ -62,7 +62,7 @@ class PyAddNewPoetryPanel(private val project: Project?,
         addInterpretersAsync(baseSdkField) {
             val sdks = findBaseSdks(existingSdks, module, context).takeIf { it.isNotEmpty() }
                     ?: detectSystemWideSdks(module, existingSdks, context)
-            sdks.filterNot { PythonSdkUtil.isInvalid(it) || project?.let { project -> isPoetry(project, it) } == true }
+            sdks.filterNot { PythonSdkUtil.isInvalid(it) || it.isPoetry }
         }
     }
 
@@ -179,7 +179,7 @@ class PyAddNewPoetryPanel(private val project: Project?,
         val path = projectPath ?: return null
         val project = project ?: return null
         val addedPoetry = existingSdks.find {
-            it.associatedModulePath == path && isPoetry(project, it)
+            it.associatedModulePath == path && it.isPoetry
         } ?: return null
         if (addedPoetry.homeDirectory == null) return null
         // TODO: check existing envs

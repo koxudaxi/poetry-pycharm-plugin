@@ -144,6 +144,7 @@
 
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.python</depends>
+    <depends>com.intellij.modules.platform</depends>
     <depends optional="true" config-file="only-toml.xml">org.toml.lang</depends>
     <extensions defaultExtensionNs="com.intellij">
         <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>

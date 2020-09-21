@@ -132,7 +132,7 @@ public abstract class PoetryUnresolvedReferencesVisitor extends PyInspectionVisi
     if (sdk == null) {
       return;
     }
-    if (!com.koxudaxi.poetry.PoetryKt.isPoetry(project, sdk)) {
+    if (!com.koxudaxi.poetry.PoetryKt.isPoetry(sdk)) {
       return;
     }
 //    super.visitPyElement(node);

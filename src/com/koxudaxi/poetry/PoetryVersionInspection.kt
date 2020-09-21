@@ -27,7 +27,7 @@ class PoetryVersionInspection : LocalInspectionTool() {
         override fun visitFile(file: PsiFile) {
             val module = guessModule(file) ?: return
             val sdk = PythonSdkUtil.findPythonSdk(module) ?: return
-            if (!isPoetry(file.project, sdk)) return
+            if (!sdk.isPoetry) return
             if (file.virtualFile != module.pyProjectToml) return
             file.children
                     .filter { element ->

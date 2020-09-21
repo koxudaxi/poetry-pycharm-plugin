@@ -56,7 +56,7 @@ class PoetryInterpreterInspection : PyInspection() {
             } else {
                 val associatedModule = sdk.associatedModule
                 val associatedName = associatedModule?.name ?: sdk.associatedModulePath
-                if (isPoetry(module.project, sdk) && associatedModule !== module) {
+                if (sdk.isPoetry && associatedModule !== module) {
                     val message = if (associatedName == null) {
                         "Poetry interpreter is not associated with any $interpreterOwner"
                     } else {
