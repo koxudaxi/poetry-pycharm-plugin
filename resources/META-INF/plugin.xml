@@ -154,6 +154,7 @@
         <localInspection language="Python" shortName="PoetryUnresolvedReferencesInspection" suppressId="PoetryUnresolvedReferences" bundle="messages.PoetryPsiBundle" key="INSP.NAME.unresolved.refs" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryUnresolvedReferencesInspection" order="first"/>
         <applicationService serviceInterface="com.koxudaxi.poetry.PyPoetryPackageManagers"
                             serviceImplementation="com.koxudaxi.poetry.PyPoetryPackageManagersImpl"/>
+        <postStartupActivity implementation="com.koxudaxi.poetry.PoetryConfigLoader" order="last"/>
     </extensions>
 <!--    <projectListeners>-->
 <!--        <listener class="com.koxudaxi.poetry.PoetryPackageManagerListener"-->
