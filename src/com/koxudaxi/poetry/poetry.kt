@@ -179,7 +179,7 @@ fun setupPoetrySdkUnderProgress(project: Project?,
         else -> syncRunPoetry(FileUtil.toSystemDependentName(projectPath), "run", "python", "-V", defaultResult =  null){it}
     }?.trim()
 
-    val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)}) $pythonVersion"
+    val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)})"
     return createSdkByGenerateTask(task, existingSdks, null, projectPath, suggestedName)?.apply {
         isPoetry = true
         associateWithModule(module ?: project?.modules?.firstOrNull(), newProjectPath)
@@ -392,7 +392,6 @@ class PoetryInstallQuickFix : LocalQuickFix {
             val listener = PyPackageRequirementsInspection.RunningPackagingTasksListener(module)
             val ui = PoetryPackageManagerUI(project, sdk, listener)
             ui.install(null, listOf())
-            PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(sdk.homePath!!)
         }
     }
 
