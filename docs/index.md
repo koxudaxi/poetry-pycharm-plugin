@@ -25,7 +25,9 @@ The plugin is in JetBrains repository ([Poetry Plugin Page](https://plugins.jetb
 
 You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Document](https://www.jetbrains.com/help/idea/managing-plugins.html)
 
-**The plugin requires PyCharm 2020.1 or later (include other JetBrains IDEs)**
+~~The plugin requires PyCharm 2020.1 or later (include other JetBrains IDEs)~~
+**PyCharm 2020.2.2 has extension points that are supported the plugin version 0.5 or later**
+I recommend the version to get all features and performance.
 
 ![search plugin](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/search_plugin.png)
 
@@ -48,16 +50,25 @@ If the plugin does not detect your poetry environment after changing the environ
 I think this problem will be resolved by extension points in the future. 
 
 ## Feature Restrictions  
+
 The plugin can't provide some features for technical reasons.
 
 Because PyCharm has not provided APIs to support third-party python package managers yet. (a.k.a [extension points](https://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_extensions.html)) 
 
 We will be able to implement the following features when JetBrains add extension points to PyCharms.
 
-- Create a new environment when creating a new project.
-- Use the Custom Icon for poetry.
-- Install/uninstall a package from GUI(settings)
+- ~~Create a new environment when creating a new project.~~  
+- Use the Custom Icon for poetry. (Coming Soon)
+- ~~Install/uninstall a package from GUI(settings)~~ 
 - And more.
+
+### Update: 2020/09/22
+PyCharm 2020.2.2 has new extension points for custom package manager like Poetry.
+
+The new extension points are supported the plugin version that is 0.5 or later.
+
+https://youtrack.jetbrains.com/issue/PY-44304
+
 
 ## Motivation
 [Poetry](https://github.com/python-poetry/poetry) is a popular package manager of python.

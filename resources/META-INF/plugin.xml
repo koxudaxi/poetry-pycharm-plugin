@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.1.3</version>
+    <version>0.5.0</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.5.0</h2>
+    <p>Features</p>
+    <ul>
+        <li>Support 2020.2.2 [#104]</li>
+    </ul>
     <h2>version 0.1.3</h2>
     <p>Features</p>
     <ul>
