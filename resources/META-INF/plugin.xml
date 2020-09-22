@@ -139,10 +139,10 @@
     <li>install packages from poetry.lock</li>
     <li>update and lock with a popup</li>
     <li>show a message and a link to fix settings (QuickFix)</li>
-    <li>install extras by clicking a line marker (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
-    <h3>TODO</h3>
-    <li>add actions on context-menu</li>
-    <li>document</li>
+    <li>install extras and run scripts by clicking a line marker (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
+    <li>show a message for outdated version packages (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
+    <li>install/uninstall packages from GUI</li>
+
     ]]></description>
 
     <idea-version since-build="202.7319.64" until-build="202.*"/>
