@@ -6,16 +6,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.projectRoots.SdkAdditionalData
 import com.intellij.openapi.util.UserDataHolder
-import com.jetbrains.python.PyPsiBundle
-import com.jetbrains.python.packaging.pipenv.PyPipEnvPackageManagementService
 import com.jetbrains.python.packaging.ui.PyPackageManagementService
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.sdk.PyInterpreterInspectionQuickFixData
 import com.jetbrains.python.sdk.PySdkProvider
 import com.jetbrains.python.sdk.PythonSdkUtil
 import com.jetbrains.python.sdk.add.PyAddNewEnvPanel
-import com.jetbrains.python.sdk.pipenv.UsePipEnvQuickFix
-import com.jetbrains.python.sdk.pipenv.isPipEnv
 import org.jdom.Element
 import javax.swing.Icon
 
@@ -32,11 +28,11 @@ class PoetrySdkProvider : PySdkProvider {
             val message = when {
                 associatedModulePath != null -> when {
                     isPyCharm -> "Poetry interpreter is associated with another project: $associatedModulePath"
-                    else -> "Pipenv interpreter is associated with another module: $associatedModulePath"
+                    else -> "Poetry interpreter is associated with another module: $associatedModulePath"
                 }
                 else -> when {
-                    isPyCharm -> "Pipenv interpreter is not associated with any project"
-                    else -> "Pipenv interpreter is not associated with any module"
+                    isPyCharm -> "Poetry interpreter is not associated with any project"
+                    else -> "Poetry interpreter is not associated with any module"
                 }
             }
             return PyInterpreterInspectionQuickFixData(UsePoetryQuickFix(sdk, module), message)

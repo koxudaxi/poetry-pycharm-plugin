@@ -12,7 +12,6 @@ import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.PythonSdkType
 import com.jetbrains.python.sdk.associatedModule
 import com.jetbrains.python.sdk.baseDir
-import com.jetbrains.python.sdk.pipenv.runPipEnv
 
 /**
  * @author vlan
@@ -68,7 +67,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         val args = listOf("uninstall") +
                 packages.map { it.name }
         try {
-            runPipEnv(sdk, *args.toTypedArray())
+            runPoetry(sdk, *args.toTypedArray())
         } finally {
             sdk.associatedModule?.baseDir?.refresh(true, false)
             refreshAndGetPackages(true)
