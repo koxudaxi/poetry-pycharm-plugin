@@ -64,7 +64,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     }
 
     override fun uninstall(packages: List<PyPackage>) {
-        val args = listOf("uninstall") +
+        val args = listOf("remove") +
                 packages.map { it.name }
         try {
             runPoetry(sdk, *args.toTypedArray())
