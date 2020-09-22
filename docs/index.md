@@ -26,7 +26,9 @@ The plugin is in JetBrains repository ([Poetry Plugin Page](https://plugins.jetb
 You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Document](https://www.jetbrains.com/help/idea/managing-plugins.html)
 
 ~~The plugin requires PyCharm 2020.1 or later (include other JetBrains IDEs)~~
+
 **PyCharm 2020.2.2 has extension points that are supported the plugin version 0.5 or later**
+
 I recommend the version to get all features and performance.
 
 ![search plugin](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/search_plugin.png)
