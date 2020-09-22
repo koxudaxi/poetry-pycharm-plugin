@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.1.3</version>
+    <version>0.5.0</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.5.0</h2>
+    <p>Features</p>
+    <ul>
+        <li>Support 2020.2.2 [#104]</li>
+    </ul>
     <h2>version 0.1.3</h2>
     <p>Features</p>
     <ul>
@@ -134,36 +139,29 @@
     <li>install packages from poetry.lock</li>
     <li>update and lock with a popup</li>
     <li>show a message and a link to fix settings (QuickFix)</li>
-    <li>install extras by clicking a line marker (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
-    <h3>TODO</h3>
-    <li>add actions on context-menu</li>
-    <li>document</li>
+    <li>install extras and run scripts by clicking a line marker (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
+    <li>show a message for outdated version packages (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
+    <li>install/uninstall packages from GUI</li>
+
     ]]></description>
 
-    <idea-version since-build="201.*" until-build="202.*"/>
+    <idea-version since-build="202.7319.64" until-build="202.*"/>
 
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.python</depends>
+    <depends>com.intellij.modules.platform</depends>
     <depends optional="true" config-file="only-toml.xml">org.toml.lang</depends>
     <extensions defaultExtensionNs="com.intellij">
         <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>
         <projectService serviceImplementation="com.koxudaxi.poetry.PoetryConfigService"/>
-        <localInspection language="Python" shortName="PoetryInterpreterInspection" suppressId="PoetryInterpreter" bundle="messages.PoetryPsiBundle" displayName="Invalid Poetry interpreter configured" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryInterpreterInspection"/>
-        <localInspection language="Python" shortName="PoetryPackageRequirementsInspection" suppressId="PoetryPackageRequirements" bundle="messages.PoetryPsiBundle" displayName="Poetry Package requirements" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryPackageRequirementsInspection"/>
-        <localInspection language="Python" shortName="PoetryUnresolvedReferencesInspection" suppressId="PoetryUnresolvedReferences" bundle="messages.PoetryPsiBundle" key="INSP.NAME.unresolved.refs" groupKey="INSP.GROUP.python" enabledByDefault="true" level="WARNING" implementationClass="com.koxudaxi.poetry.PoetryUnresolvedReferencesInspection" order="first"/>
-        <applicationService serviceInterface="com.koxudaxi.poetry.PyPoetryPackageManagers"
-                            serviceImplementation="com.koxudaxi.poetry.PyPoetryPackageManagersImpl"/>
+        <postStartupActivity implementation="com.koxudaxi.poetry.PoetryConfigLoader" order="last"/>
     </extensions>
-    <projectListeners>
-        <listener class="com.koxudaxi.poetry.PoetryPackageManagerListener"
-                  topic="com.jetbrains.python.packaging.PyPackageManager$Listener"/>
-    </projectListeners>
     <extensions defaultExtensionNs="Pythonid">
         <pyAddSdkProvider implementation="com.koxudaxi.poetry.PyAddPoetrySdkProvider"/>
         <pythonFlavorProvider implementation="com.koxudaxi.poetry.PyPoetrySdkFlavorProvider"/>
+        <pySdkProvider implementation="com.koxudaxi.poetry.PoetrySdkProvider"/>
+        <packageManagerProvider implementation="com.koxudaxi.poetry.PyPoetryPackageManagerProvider"/>
     </extensions>
-
-    <resource-bundle/>
     <actions>
         <action id="poetryInstallExtras" class="com.koxudaxi.poetry.PoetryInstallExtras" text="Install Packages"
                 description="Poetry install extras packages">

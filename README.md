@@ -13,10 +13,19 @@ See [documentation](https://koxudaxi.github.io/poetry-pycharm-plugin/) for more 
 ## Demo
 ![poetry_demo1](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/poetry_demo1.gif)
 
-## This project is currently in an experimental phase
-This plugin supports minimum [features](#features) to use poetry in PyCharm.
 
-There is [feature restrictions](#feature-restrictions).
+
+## Update: 2020/09/22
+PyCharm has started supporting third-party package managers since 2020.2.2.
+
+The plugin is compatible with the feature. (version 0.5.0 or later)
+
+https://youtrack.jetbrains.com/issue/PY-44304
+
+## This project is currently in an experimental phase
+~~This plugin supports minimum [features](#features) to use poetry in PyCharm.~~
+
+~~There is [feature restrictions](#feature-restrictions).~~
 
 But, PyCharm team will add a few api to resolve the problem. The detail is in [this issue](https://github.com/koxudaxi/poetry-pycharm-plugin/issues/58).
 
@@ -28,7 +37,11 @@ The plugin is in JetBrains repository ([Poetry Plugin Page](https://plugins.jetb
 
 You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Document](https://www.jetbrains.com/help/idea/managing-plugins.html)
 
-**The plugin requires PyCharm 2020.1 or later (include other JetBrains IDEs)**
+~~The plugin requires PyCharm 2020.1 or later (include other JetBrains IDEs)~~
+
+**I recommend PyCharm 2020.2.2 and the plugin version 0.5 or later to get all features and performance.**
+
+
 
 ![search plugin](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/search_plugin.png)
 
@@ -43,6 +56,7 @@ You can install the stable version on PyCharm's `Marketplace` (Preference -> Plu
 - show a message and a link to fix settings (QuickFix)
 - install extras and run scripts by clicking a line marker ([Toml plugin](https://plugins.jetbrains.com/plugin/8195-toml) is required)
 - show a message for outdated version packages ([Toml plugin](https://plugins.jetbrains.com/plugin/8195-toml) is required)
+- install/uninstall packages from GUI
 
 ## Workaround
 If the plugin does not detect your poetry environment after changing the environment, then please re-open the project.
@@ -50,15 +64,16 @@ If the plugin does not detect your poetry environment after changing the environ
 I think this problem will be resolved by extension points in the future. 
 
 ## Feature Restrictions  
+
 The plugin can't provide some features for technical reasons.
 
 Because PyCharm has not provided APIs to support third-party python package managers yet. (a.k.a [extension points](https://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_extensions.html)) 
 
 We will be able to implement the following features when JetBrains add extension points to PyCharms.
 
-- Create a new environment when creating a new project.
-- Use the Custom Icon for poetry.
-- Install/uninstall a package from GUI(settings)
+- ~~Create a new environment when creating a new project.~~  
+- Use the Custom Icon for poetry. (Coming Soon)
+- ~~Install/uninstall a package from GUI(settings)~~ 
 - And more.
 
 ## Motivation

@@ -7,6 +7,7 @@ import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.PsiFile
+import com.jetbrains.python.packaging.PyPackageManager
 import com.jetbrains.python.sdk.*
 import org.toml.lang.psi.*
 
@@ -27,7 +28,7 @@ class PoetryVersionInspection : LocalInspectionTool() {
         override fun visitFile(file: PsiFile) {
             val module = guessModule(file) ?: return
             val sdk = PythonSdkUtil.findPythonSdk(module) ?: return
-            if (!isPoetry(file.project, sdk)) return
+            if (!sdk.isPoetry) return
             if (file.virtualFile != module.pyProjectToml) return
             file.children
                     .filter { element ->
@@ -36,7 +37,7 @@ class PoetryVersionInspection : LocalInspectionTool() {
                         it.children.mapNotNull { line -> line as? TomlKeyValue }
                     }.forEach { keyValue ->
                         val packageName = keyValue.key.text
-                        val outdatedVersion = PyPoetryPackageManager.getInstance(sdk).getOutdatedPackages()[packageName]
+                        val outdatedVersion = (PyPackageManager.getInstance(sdk) as? PyPoetryPackageManager)?.let { it.getOutdatedPackages()[packageName] }
                         if (outdatedVersion is PoetryOutdatedVersion) {
                             val message = "'${packageName}' version ${outdatedVersion.currentVersion} is outdated (latest: ${outdatedVersion.latestVersion})"
                             holder.registerProblem(keyValue, message, ProblemHighlightType.WARNING)

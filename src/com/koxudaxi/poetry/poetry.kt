@@ -1,7 +1,6 @@
 // Copyright 2000-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 package com.koxudaxi.poetry
 
-import PoetryPackageManagerUI
 import com.google.gson.annotations.SerializedName
 import com.intellij.CommonBundle
 import com.intellij.codeInspection.LocalQuickFix
@@ -14,8 +13,8 @@ import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.ide.util.PropertiesComponent
-import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
+import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationListener
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
@@ -52,6 +51,7 @@ import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.sdk.add.*
+import com.jetbrains.python.sdk.flavors.PythonSdkFlavor
 import com.jetbrains.python.statistics.modules
 import icons.PythonIcons
 import org.apache.tuweni.toml.Toml
@@ -63,6 +63,7 @@ import org.jetbrains.annotations.TestOnly
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import java.util.function.Supplier
 import java.util.regex.Pattern
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
@@ -127,8 +128,7 @@ fun detectPoetryExecutable(): File? {
         SystemInfo.isWindows -> "poetry.bat"
         else -> "poetry"
     }
-    return PathEnvironmentVariableUtil.findInPath(name) ?:
-    System.getProperty("user.home")?.let {homePath ->
+    return PathEnvironmentVariableUtil.findInPath(name) ?: System.getProperty("user.home")?.let { homePath ->
         File(homePath + File.separator + ".poetry" + File.separator + "bin" + File.separator + name).takeIf { it.exists() }
     }
 }
@@ -172,24 +172,19 @@ fun setupPoetrySdkUnderProgress(project: Project?,
         }
     }
 
-
-    val pythonVersion = when (python) {
-        is String -> ApplicationManager.getApplication().executeOnPooledThread<String> {  runCommand(FileUtil.toSystemDependentName(projectPath), python, "-V") }.get(10, TimeUnit.SECONDS)
-        else -> syncRunPoetry(FileUtil.toSystemDependentName(projectPath), "run", "python", "-V", defaultResult =  null){it}
-    }?.trim()
-
-    val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)}) $pythonVersion"
+    val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)})"
     return createSdkByGenerateTask(task, existingSdks, null, projectPath, suggestedName)?.apply {
+        isPoetry = true
         associateWithModule(module ?: project?.modules?.firstOrNull(), newProjectPath)
-        project?.let { project ->
-            existingSdks.find {
-                it.associatedModulePath == projectPath && isPoetry(project, it) && it.homePath == homePath
-            }?.run {
-                // re-use existing invalid sdk
-                return null
-            }
-            PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(homePath!!)
-        }
+//        project?.let { project ->
+//            existingSdks.find {
+//                it.associatedModulePath == projectPath && isPoetry(project, it) && it.homePath == homePath
+//            }?.run {
+//                 re-use existing invalid sdk
+//                return null
+//            }
+//            PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(homePath!!)
+//        }
     }
 }
 
@@ -201,9 +196,9 @@ fun setupPoetrySdkUnderProgress(project: Project?,
 fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPackages: Boolean, init: Boolean): @SystemDependent String {
     if (init) {
         runPoetry(projectPath, *listOf("init", "-n").toTypedArray())
-        if (python != null){
+        if (python != null) {
             // Replace python version in toml
-            runCommand(projectPath, python,"-c", REPLACE_PYTHON_VERSION)
+            runCommand(projectPath, python, "-c", REPLACE_PYTHON_VERSION)
         }
     }
     when {
@@ -218,9 +213,31 @@ fun setupPoetry(projectPath: @SystemDependent String, python: String?, installPa
 }
 
 
-fun isPoetry(project: Project, sdk: Sdk): Boolean {
+@Deprecated("This function is for backward compatibility")
+fun isPoetryFromConfig(project: Project, sdk: Sdk): Boolean {
     return PoetryConfigService.getInstance(project).poetryVirtualenvPaths.contains(sdk.homePath)
 }
+
+
+var Sdk.isPoetry: Boolean
+    get() = sdkAdditionalData is PyPoetrySdkAdditionalData
+    set(value) {
+        val oldData = sdkAdditionalData
+        val newData = if (value) {
+            when (oldData) {
+                is PythonSdkAdditionalData -> PyPoetrySdkAdditionalData(oldData)
+                else -> PyPoetrySdkAdditionalData()
+            }
+        } else {
+            when (oldData) {
+                is PyPoetrySdkAdditionalData -> PythonSdkAdditionalData(PythonSdkFlavor.getFlavor(this))
+                else -> oldData
+            }
+        }
+        val modificator = sdkModificator
+        modificator.sdkAdditionalData = newData
+        ApplicationManager.getApplication().runWriteAction { modificator.commitChanges() }
+    }
 
 /**
  * Runs the configured poetry for the specified Poetry SDK with the associated project path.
@@ -298,16 +315,17 @@ fun detectAndSetupPoetry(project: Project?, module: Module?, existingSdks: List<
 /**
  * The URLs of package sources configured in the Pipfile.lock of the module associated with this SDK.
  */
-//val Sdk.poetryLockSources: List<String>
-//    get() = parsePoetryLock()?.meta?.sources?.mapNotNull { it.url } ?: listOf(POETRY_DEFAULT_SOURCE_URL)
+val Sdk.poetrySources: List<String>
+    // TODO parse pyproject.toml for tool.poetry.source.url
+    get() = listOf(POETRY_DEFAULT_SOURCE_URL)
 
 /**
  * The list of requirements defined in the poetry.lock of the module associated with this SDK.
  */
-val Sdk.poetryLockRequirements: List<PyRequirement>?
-    get() {
-        return poetryLock?.let { PyPoetryPackageManager.getInstance(this).getRequirements() }
-    }
+//val Sdk.poetryLockRequirements: List<PyRequirement>?
+//    get() {
+//        return poetryLock?.let { PyPoetryPackageManager.getInstance(this).getRequirements() }
+//    }
 
 /**
  * A quick-fix for setting up the poetry for the module of the current PSI element.
@@ -329,7 +347,7 @@ class UsePoetryQuickFix(sdk: Sdk?, module: Module) : LocalQuickFix {
             // XXX: Should we show an error message on exceptions and on null?
             val newSdk = setupPoetrySdkUnderProgress(project, module, existingSdks, null, null, false)
                     ?: return
-            val existingSdk = existingSdks.find { isPoetry(project, it) && it.homePath == newSdk.homePath }
+            val existingSdk = existingSdks.find { it.isPoetry && it.homePath == newSdk.homePath }
             val sdk = existingSdk ?: newSdk
             if (sdk == newSdk) {
                 SdkConfigurationUtil.addSdk(newSdk)
@@ -363,12 +381,11 @@ class PoetryInstallQuickFix : LocalQuickFix {
     companion object {
         fun poetryInstall(project: Project, module: Module) {
             val sdk = module.pythonSdk ?: return
-            if (!isPoetry(project, sdk)) return
+            if (!sdk.isPoetry) return
             // TODO: create UI
             val listener = PyPackageRequirementsInspection.RunningPackagingTasksListener(module)
-            val ui = PoetryPackageManagerUI(project, sdk, listener)
+            val ui = PyPackageManagerUI(project, sdk, listener)
             ui.install(null, listOf())
-            PoetryConfigService.getInstance(project).poetryVirtualenvPaths.add(sdk.homePath!!)
         }
     }
 
@@ -456,7 +473,7 @@ class PyProjectTomlWatcher : EditorFactoryListener {
         val project = editor.project ?: return false
         val module = file.getModule(project) ?: return false
         val sdk = module.pythonSdk ?: return false
-        if (!isPoetry(project, sdk)) return false
+        if (!sdk.isPoetry) return false
         return module.pyProjectToml == file
     }
 }
@@ -469,9 +486,9 @@ private fun VirtualFile.getModule(project: Project): Module? =
 
 private val LOCK_NOTIFICATION_GROUP = NotificationGroup("$PY_PROJECT_TOML Watcher", NotificationDisplayType.STICKY_BALLOON, false)
 
-private val Sdk.packageManager: PyPoetryPackageManager
-    get() = PyPoetryPackageManager.getInstance(this)
-
+//private val Sdk.packageManager: PyPoetryPackageManager
+//    get() = PyPoetryPackageManager.getInstance(this)
+//
 
 @TestOnly
 fun getPoetryLockRequirements(virtualFile: VirtualFile, packageManager: PyPackageManager): List<PyRequirement>? {
@@ -557,10 +574,8 @@ fun runPoetryInBackground(module: Module, args: List<String>, description: Strin
                 }
             } finally {
                 PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
-                sdk.associatedModule?.baseDir?.refresh(true, false)
-                if (isPoetry(project, sdk)) {
-                    PyPoetryPackageManager.getInstance(sdk).refreshAndGetPackages(true)
-                }
+                sdk.associatedModuleDir?.refresh(true, false)
+                PyPackageManager.getInstance(sdk).refreshAndGetPackages(true)
             }
         }
     }
@@ -588,7 +603,7 @@ fun createPoetryPanel(project: Project?,
         newPoetryPanel != null -> newPoetryPanel
         else -> existingPoetryPanel
     }
-    return PyAddSdkGroupPanel(PoetryBundle.messagePointer("python.add.sdk.panel.name.poetry.environment"),
+    return PyAddSdkGroupPanel(Supplier { "Poetry environment" },
             PythonIcons.Python.Virtualenv, panels, defaultPanel)
 }
 
@@ -641,7 +656,7 @@ fun getPythonExecutable(homePath: String): String =
 fun parsePoetryShowOutdated(input: String): Map<String, PoetryOutdatedVersion> {
     return input
             .lines()
-            .mapNotNull  { line ->
+            .mapNotNull { line ->
                 line.split(Pattern.compile(" +"))
                         .takeIf { it.size > 3 }?.let { it[0] to PoetryOutdatedVersion(it[1], it[2]) }
             }.toMap()
