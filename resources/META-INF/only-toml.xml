@@ -4,7 +4,6 @@
                                   implementationClass="com.koxudaxi.poetry.PoetryExtrasLineMarkerContributor"/>
         <runLineMarkerContributor language="TOML"
                                   implementationClass="com.koxudaxi.poetry.PoetryScriptsLineMarkerContributor"/>
-        <localInspection language="TOML" enabledByDefault="true" implementationClass="com.koxudaxi.poetry.PoetryVersionInspection" displayName="Poetry Package versions" bundle="messages.PoetryPsiBundle" groupKey="INSP.GROUP.python" suppressId="PoetryPackageVersion"/>
-
+        <localInspection language="TOML" enabledByDefault="true" implementationClass="com.koxudaxi.poetry.PoetryVersionInspection" displayName="Poetry Package versions"  bundle="messages.PyPsiBundle"  groupKey="INSP.GROUP.python" suppressId="PoetryPackageVersion" shortName="PoetryPackageVersion"/>
     </extensions>
 </idea-plugin>
