@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.5.3</version>
+    <version>0.5.4</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 0.5.4</h2>
+    <p>Bug fixes</p>
+    <ul>
+        <li>Fix wrong icon for system interpreter [#127]</li>
+    </ul>
     <h2>version 0.5.3</h2>
     <p>Bug fixes</p>
     <ul>

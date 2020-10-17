@@ -604,7 +604,7 @@ fun createPoetryPanel(project: Project?,
         else -> existingPoetryPanel
     }
     return PyAddSdkGroupPanel(Supplier { "Poetry environment" },
-            PythonIcons.Python.Virtualenv, panels, defaultPanel)
+            POETRY_ICON, panels, defaultPanel)
 }
 
 
