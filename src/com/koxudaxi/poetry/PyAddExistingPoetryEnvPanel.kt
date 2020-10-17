@@ -27,7 +27,6 @@ import com.jetbrains.python.sdk.add.PyAddSdkPanel
 import com.jetbrains.python.sdk.add.PyAddSdkView
 import com.jetbrains.python.sdk.add.PySdkPathChoosingComboBox
 import com.jetbrains.python.sdk.add.addInterpretersAsync
-import icons.PythonIcons
 import java.awt.BorderLayout
 import javax.swing.Icon
 
@@ -45,7 +44,7 @@ class PyAddExistingPoetryEnvPanel(private val project: Project?,
                                   override var newProjectPath: String?,
                                   context: UserDataHolder) : PyAddSdkPanel() {
     override val panelName: String get() = PyBundle.message("python.add.sdk.panel.name.existing.environment")
-    override val icon: Icon = PythonIcons.Python.Virtualenv
+    override val icon: Icon = POETRY_ICON
     private val sdkComboBox = PySdkPathChoosingComboBox()
 
     init {

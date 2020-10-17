@@ -59,7 +59,7 @@ class PoetrySdkProvider : PySdkProvider {
     override fun getSdkAdditionalText(sdk: Sdk): String? = if (sdk.isPoetry) sdk.versionString else null
 
     override fun getSdkIcon(sdk: Sdk): Icon? {
-        return POETRY_ICON
+        return if (sdk.isPoetry) POETRY_ICON else null
     }
 
     override fun loadAdditionalDataForSdk(element: Element): SdkAdditionalData? {
