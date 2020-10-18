@@ -18,20 +18,50 @@ class PyPoetryPackageManagerTest : PoetryTestCase() {
     fun getPyRequirement(name: String, version: String): PyRequirement? {
         return PyRequirementParser.fromLine("${name}==${version}")
     }
-    fun testParsePoetryInstallDryRun() {
+    fun testParsePoetryInstallDryRun1_0() {
         val sdk = PythonMockSdk.create("3.7")
         val pyPoetryPackageManager = PyPoetryPackageManager(sdk)
         val result = pyPoetryPackageManager.parsePoetryInstallDryRun(testDataAsText)
-        assertEquals(result.first.size, 1)
+        assertEquals(result.first.size, 3)
         assertEquals(result.first,
-                listOf(getPyPackage("typed-ast", "1.4.1"))
+                listOf(
+                        getPyPackage("six", "1.15.0"),
+                        getPyPackage("attrs", "20.2.0"),
+                        getPyPackage("colorama", "0.4.3")
+                )
         )
-        assertEquals(result.second.size, 3)
+        assertEquals(result.second.size, 5)
         assertEquals(result.second,
                 listOf(
-                        getPyRequirement("mypy-extensions","0.4.3"),
-                        getPyRequirement("typing-extensions","3.7.4.2"),
-                        getPyRequirement("mypy","0.770")
+                        getPyRequirement("six","1.15.0"),
+                        getPyRequirement("attrs","20.2.0"),
+                        getPyRequirement("jmespath","0.10.0"),
+                        getPyRequirement("botocore","1.18.18"),
+                        getPyRequirement("colorama","0.4.4")
+                )
+        )
+
+    }
+    fun testParsePoetryInstallDryRun1_1() {
+        val sdk = PythonMockSdk.create("3.7")
+        val pyPoetryPackageManager = PyPoetryPackageManager(sdk)
+        val result = pyPoetryPackageManager.parsePoetryInstallDryRun(testDataAsText)
+        assertEquals(result.first.size, 3)
+        assertEquals(result.first,
+                listOf(
+                        getPyPackage("six", "1.15.0"),
+                        getPyPackage("attrs", "20.2.0"),
+                        getPyPackage("colorama", "0.4.3")
+                )
+        )
+        assertEquals(result.second.size, 5)
+        assertEquals(result.second,
+                listOf(
+                        getPyRequirement("six","1.15.0"),
+                        getPyRequirement("attrs","20.2.0"),
+                        getPyRequirement("jmespath","0.10.0"),
+                        getPyRequirement("botocore","1.18.18"),
+                        getPyRequirement("colorama","0.4.4")
                 )
         )
 

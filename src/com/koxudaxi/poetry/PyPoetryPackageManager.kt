@@ -22,6 +22,8 @@ import com.jetbrains.python.sdk.baseDir
  */
 
 class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
+    private val installedLines = listOf("Already installed", "Skipping", "Updating")
+
     @Volatile
     private var packages: List<PyPackage>? = null
 
@@ -92,8 +94,6 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
 
     override fun getPackages() = packages
 
-    fun getRequirements() = requirements
-
     fun getOutdatedPackages() = outdatedPackages
 
     override fun refreshAndGetPackages(alwaysRefresh: Boolean): List<PyPackage> {
@@ -140,12 +140,6 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         return emptySet()
     }
 
-//    companion object {
-//        fun getInstance(sdk: Sdk): PyPoetryPackageManager {
-//            return PyPoetryPackageManagers.getInstance().forSdk(sdk)
-//        }
-//    }
-
     private fun getVersion(version: String): String {
         return if (Regex("^[0-9]").containsMatchIn(version)) "==$version" else version
     }
@@ -163,9 +157,14 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
      * Parses the output of `poetry install --dry-run ` into a list of packages.
      */
     fun parsePoetryInstallDryRun(input: String): Pair<List<PyPackage>, List<PyRequirement>> {
-        fun getNameAndVersion(line: String): Pair<String, String> {
+        fun getNameAndVersion(line: String): Triple<String, String, String> {
             return line.split(" ").let {
-                Pair(it[4], it[5].replace(Regex("[()]"), ""))
+                val installedVersion = it[5].replace(Regex("[():]"), "")
+                val requiredVersion = when {
+                    it.size > 7 && it[6] == "->" -> it[7].replace(Regex("[():]"), "")
+                    else -> installedVersion
+                }
+                Triple(it[4], installedVersion, requiredVersion)
             }
         }
 
@@ -173,12 +172,14 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         val pyRequirements = mutableListOf<PyRequirement>()
         input
                 .lineSequence()
-                .filter { it.endsWith(")") || it.endsWith("Already installed") }
+                .filter { listOf(")", "Already installed").any{ lastWords -> it.endsWith(lastWords) } }
                 .forEach { line ->
                     getNameAndVersion(line).also {
-                        when {
-                            line.contains("Already installed") -> pyPackages.add(PyPackage(it.first, it.second, null, emptyList()))
-                            line.contains("Installing") -> pyRequirements.addAll(this.parseRequirements(it.first + getVersion(it.second)).asSequence())
+                        if (installedLines.any { installedLine -> line.contains(installedLine) } ) {
+                            pyPackages.add(PyPackage(it.first, it.second, null, emptyList()))
+                            this.parseRequirement(it.first + getVersion(it.third))?.let { pyRequirement -> pyRequirements.add(pyRequirement) }
+                        } else if ( line.contains("Installing")) {
+                            this.parseRequirement(it.first + getVersion(it.third))?.let { pyRequirement -> pyRequirements.add(pyRequirement) }
                         }
                     }
                 }
