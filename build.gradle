@@ -55,7 +55,7 @@ allprojects {
     }
 
     dependencies {
-        testImplementation 'junit:junit:4.13'
+        testImplementation 'junit:junit:4.13.1'
         implementation "org.apache.tuweni:tuweni-toml:$tuweni_toml_version"
         compile "org.jetbrains:annotations:20.0.0"
     }
