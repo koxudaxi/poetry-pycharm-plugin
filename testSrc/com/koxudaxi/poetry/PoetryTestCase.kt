@@ -12,7 +12,7 @@ abstract class PoetryTestCase : BasePlatformTestCase() {
             return "testData" + File.separator + testClassName + File.separator + getTestName(true)
         }
     fun getTestData(fileName: String): VirtualFile {
-        return LocalFileSystemImpl.getInstance().findFileByPath(dataDir + File.separator + fileName)!!
+        return LocalFileSystemImpl.getInstance().refreshAndFindFileByPath(dataDir + File.separator + fileName)!!
     }
     fun getTestDataAsText(fileName: String): String {
         return getTestData(fileName).inputStream.bufferedReader().readText()
