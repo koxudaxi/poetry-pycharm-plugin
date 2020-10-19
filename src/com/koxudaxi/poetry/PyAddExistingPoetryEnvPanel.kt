@@ -50,7 +50,7 @@ class PyAddExistingPoetryEnvPanel(private val project: Project?,
     init {
         layout = BorderLayout()
         val formPanel = FormBuilder.createFormBuilder()
-                .addLabeledComponent(PyBundle.message("interpreter"), sdkComboBox)
+                .addLabeledComponent("Interpreter:", sdkComboBox)
                 .panel
         add(formPanel, BorderLayout.NORTH)
         addInterpretersAsync(sdkComboBox) {
@@ -75,7 +75,7 @@ class PyAddExistingPoetryEnvPanel(private val project: Project?,
     companion object {
         fun validateSdkComboBox(field: PySdkPathChoosingComboBox, view: PyAddSdkView): ValidationInfo? {
             return when (val sdk = field.selectedSdk) {
-                null -> ValidationInfo(PyBundle.message("python.sdk.interpreter.field.is.empty"), field)
+                null -> ValidationInfo("Interpreter field is empty", field)
                 // This plugin does not support installing python sdk.
 //                is PySdkToInstall -> {
 //                    val message = sdk.getInstallationWarning(getDefaultButtonName(view))
