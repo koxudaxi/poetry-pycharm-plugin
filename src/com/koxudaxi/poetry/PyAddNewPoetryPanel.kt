@@ -111,7 +111,7 @@ class PyAddNewPoetryPanel(private val project: Project?,
                 val associatedObject = if (PlatformUtils.isPyCharm()) "project" else "module"
                 addLabeledComponent("Associated $associatedObject", moduleField)
             }
-            addLabeledComponent(PyBundle.message("base.interpreter"), baseSdkField)
+            addLabeledComponent("Base interpreter:", baseSdkField)
             addComponent(installPackagesCheckBox)
             addLabeledComponent("Poetry executable:", poetryPathField)
         }
