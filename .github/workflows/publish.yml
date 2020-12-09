@@ -26,7 +26,10 @@ jobs:
      - name: Install dependencies
        run: |
          pip install -r requirements.txt
-     - run: |
+     - name: build changelog 
+       env: 
+         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+       run: |
          python scripts/build_changelog.py
          CHANGELOG_LATEST=$(cat docs/changelog_latest.md)
          CHANGELOG_LATEST="${CHANGELOG_LATEST//'%'/'%25'}"
