@@ -49,7 +49,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.util.PathUtil
 import com.intellij.util.PlatformUtils
-import com.jetbrains.python.PyBundle
 import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
