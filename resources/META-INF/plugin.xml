@@ -1,4 +1,4 @@
-<idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
+<idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin" require-restart="true">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
     <version>1.0.0</version>
@@ -7,6 +7,7 @@
     <h2>version 1.0.0</h2>
     <p>Features</p>
     <ul>
+        <li>Remove deprecated APIs [#148]</li>
         <li>Support PyCharm 2020.3 [#147]</li>
     </ul>
     <h2>version 0.5.5</h2>
