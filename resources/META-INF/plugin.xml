@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>0.5.5</version>
+    <version>1.0.0</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 1.0.0</h2>
+    <p>Features</p>
+    <ul>
+        <li>Support PyCharm 2020.3 [#147]</li>
+    </ul>
     <h2>version 0.5.5</h2>
     <p>Bug fixes</p>
     <ul>
@@ -168,6 +173,7 @@
     <li>install extras and run scripts by clicking a line marker (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
     <li>show a message for outdated version packages (<a href="https://plugins.jetbrains.com/plugin/8195-toml">Toml plugin</a> is required)</li>
     <li>install/uninstall packages from GUI</li>
+    <li>- detect poetry project when open new project</li>
 
     ]]></description>
 
@@ -179,12 +185,14 @@
         <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>
         <projectService serviceImplementation="com.koxudaxi.poetry.PoetryConfigService"/>
         <postStartupActivity implementation="com.koxudaxi.poetry.PoetryConfigLoader" order="last"/>
+        <statistics.counterUsagesCollector implementationClass="com.koxudaxi.poetry.PoetryPySdkConfigurationCollector"/>
     </extensions>
     <extensions defaultExtensionNs="Pythonid">
         <pyAddSdkProvider implementation="com.koxudaxi.poetry.PyAddPoetrySdkProvider"/>
         <pythonFlavorProvider implementation="com.koxudaxi.poetry.PyPoetrySdkFlavorProvider"/>
         <pySdkProvider implementation="com.koxudaxi.poetry.PoetrySdkProvider"/>
         <packageManagerProvider implementation="com.koxudaxi.poetry.PyPoetryPackageManagerProvider"/>
+        <projectSdkConfigurationExtension implementation="com.koxudaxi.poetry.PyPoetrySdkConfiguration"/>
     </extensions>
     <actions>
         <action id="poetryInstallExtras" class="com.koxudaxi.poetry.PoetryInstallExtras" text="Install Packages"

@@ -37,7 +37,9 @@ import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.projectRoots.impl.SdkConfigurationUtil
 import com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectSdksModel
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.util.io.FileUtil
@@ -91,7 +93,7 @@ fun getPyProjectTomlForPoetry(virtualFile: VirtualFile): Pair<Long, VirtualFile?
 }
 
 /**
- * The Pipfile found in the main content root of the module.
+ * The PyProject.toml found in the main content root of the module.
  */
 val pyProjectTomlCache = mutableMapOf<String, Pair<Long, VirtualFile?>>()
 val Module.pyProjectToml: VirtualFile?
@@ -139,6 +141,25 @@ fun detectPoetryExecutable(): File? {
 fun getPoetryExecutable(): File? =
         PropertiesComponent.getInstance().poetryPath?.let { File(it) } ?: detectPoetryExecutable()
 
+fun validatePoetryExecutable(poetryExecutable: @SystemDependent String?): ValidationInfo? {
+    val message = if (poetryExecutable.isNullOrBlank()) {
+        "Poetry executable is not found"
+    }
+    else {
+        val file = File(poetryExecutable)
+        when {
+            !file.exists() -> "File ${file.absolutePath} is not found"
+            !file.canExecute() || !file.isFile -> "Cannot execute ${file.absolutePath}"
+            else -> null
+        }
+    }
+
+    return message?.let { ValidationInfo(it) }
+}
+
+fun suggestedSdkName(basePath: @NlsSafe String): @NlsSafe String = "Poetry (${PathUtil.getFileName(basePath)})"
+
+
 /**
  * Sets up the poetry environment under the modal progress window.
  *
@@ -172,8 +193,7 @@ fun setupPoetrySdkUnderProgress(project: Project?,
         }
     }
 
-    val suggestedName = "Poetry (${PathUtil.getFileName(projectPath)})"
-    return createSdkByGenerateTask(task, existingSdks, null, projectPath, suggestedName)?.apply {
+    return createSdkByGenerateTask(task, existingSdks, null, projectPath, suggestedSdkName(projectPath))?.apply {
         isPoetry = true
         associateWithModule(module ?: project?.modules?.firstOrNull(), newProjectPath)
 //        project?.let { project ->
