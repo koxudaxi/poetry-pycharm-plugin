@@ -352,7 +352,7 @@ val Sdk.poetrySources: List<String>
  */
 class UsePoetryQuickFix(sdk: Sdk?, module: Module) : LocalQuickFix {
     private val quickFixName = when {
-        sdk != null && sdk.associatedModule != module -> "Fix Poetry interpreter"
+        sdk != null && sdk.isAssociatedWithAnotherModule(module) -> "Fix Poetry interpreter"
         else -> "Use Poetry interpreter"
     }
 

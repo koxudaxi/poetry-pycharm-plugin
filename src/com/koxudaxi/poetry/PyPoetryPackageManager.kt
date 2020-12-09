@@ -10,8 +10,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.PythonSdkType
-import com.jetbrains.python.sdk.associatedModule
-import com.jetbrains.python.sdk.baseDir
+import com.jetbrains.python.sdk.associatedModuleDir
 
 /**
  * @author vlan
@@ -32,9 +31,9 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
     private var outdatedPackages: Map<String, PoetryOutdatedVersion> = emptyMap()
 
     init {
-        PyPackageUtil.runOnChangeUnderInterpreterPaths(sdk) {
+        PyPackageUtil.runOnChangeUnderInterpreterPaths(sdk, this, Runnable{
             PythonSdkType.getInstance().setupSdkPaths(sdk)
-        }
+        })
     }
 
     override fun installManagement() {}
@@ -60,7 +59,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         try {
             runPoetry(sdk, *args.toTypedArray())
         } finally {
-            sdk.associatedModule?.baseDir?.refresh(true, false)
+            sdk.associatedModuleDir?.refresh(true, false)
             refreshAndGetPackages(true)
         }
     }
@@ -71,7 +70,7 @@ class PyPoetryPackageManager(val sdk: Sdk) : PyPackageManager() {
         try {
             runPoetry(sdk, *args.toTypedArray())
         } finally {
-            sdk.associatedModule?.baseDir?.refresh(true, false)
+            sdk.associatedModuleDir?.refresh(true, false)
             refreshAndGetPackages(true)
         }
     }

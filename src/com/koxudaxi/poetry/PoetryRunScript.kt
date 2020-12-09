@@ -12,15 +12,12 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.PsiFile
 import com.jetbrains.extensions.python.toPsi
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.run.PythonRunConfigurationProducer
-import com.jetbrains.python.sdk.associatedModule
 import com.jetbrains.python.sdk.pythonSdk
 import org.toml.lang.psi.*
-import java.io.File
 
 
 class PoetryRunScript : AnAction() {
@@ -39,12 +36,11 @@ class PoetryRunScript : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val tomlKey = e.dataContext.getData(Location.DATA_KEY)?.psiElement as? TomlKey ?: return
-        e.project?.pythonSdk?.associatedModule?.let {
-            val scriptPath = it.pythonSdk?.homeDirectory?.parent?.path.let { path -> path + File.separator + tomlKey.text }
-            val scriptFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(scriptPath)?.toPsi(it.project)
-                    ?: return ExecutionErrorDialog.show(PyExecutionException("Cannot find a script file\nPlease run 'poetry install' before executing scripts", "poetry", emptyList()), "Poetry Plugin", it.project)
-            runScriptFromRunConfiguration(it.project, scriptFile.containingFile)
-        }
+        val project = e.project ?: return
+        val scriptPath = project.pythonSdk?.homeDirectory?.parent?.findChild(tomlKey.text) ?: return
+        val scriptFile = scriptPath.toPsi(project) ?: return ExecutionErrorDialog.show(PyExecutionException("Cannot find a script file\nPlease run 'poetry install' before executing scripts", "poetry", emptyList()), "Poetry Plugin", project)
+        runScriptFromRunConfiguration(project, scriptFile.containingFile)
+
     }
 
     init {
