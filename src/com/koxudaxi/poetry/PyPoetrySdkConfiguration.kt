@@ -30,24 +30,24 @@ class PyPoetrySdkConfiguration : PyProjectSdkConfigurationExtension {
 
     override fun isApplicable(module: Module): Boolean = module.pyProjectToml != null
 
-    override fun createAndAddSdkForConfigurator(module: Module): Sdk? = createAndAddSDk(module, PoetryPySdkConfigurationCollector.Companion.Source.CONFIGURATOR)
+    override fun createAndAddSdkForConfigurator(module: Module): Sdk? = createAndAddSDk(module, false)
 
     override fun getIntentionName(module: Module): String {
         return "Create a poetry environment using ${module.pyProjectToml?.name}"
     }
 
-    override fun createAndAddSdkForInspection(module: Module): Sdk? = createAndAddSDk(module, PoetryPySdkConfigurationCollector.Companion.Source.INSPECTION)
+    override fun createAndAddSdkForInspection(module: Module): Sdk? = createAndAddSDk(module, true)
 
-    private fun createAndAddSDk(module: Module, source: PoetryPySdkConfigurationCollector.Companion.Source): Sdk? {
-        val poetryEnvExecutable = askForEnvData(module, source) ?: return null
+    private fun createAndAddSDk(module: Module, inspection: Boolean): Sdk? {
+        val poetryEnvExecutable = askForEnvData(module, inspection) ?: return null
         PropertiesComponent.getInstance().poetryPath = poetryEnvExecutable.poetryPath
         return createPoetry(module)
     }
 
-    private fun askForEnvData(module: Module, source: PoetryPySdkConfigurationCollector.Companion.Source): PyAddNewPoetryFromFilePanel.Data? {
+    private fun askForEnvData(module: Module, inspection: Boolean): PyAddNewPoetryFromFilePanel.Data? {
         val poetryExecutable = getPoetryExecutable()?.absolutePath
 
-        if (source == PoetryPySdkConfigurationCollector.Companion.Source.INSPECTION && validatePoetryExecutable(poetryExecutable) == null) {
+        if (inspection && validatePoetryExecutable(poetryExecutable) == null) {
             return PyAddNewPoetryFromFilePanel.Data(poetryExecutable!!)
         }
 
@@ -63,12 +63,6 @@ class PyPoetrySdkConfiguration : PyProjectSdkConfigurationExtension {
             LOGGER.debug("Dialog exit code: ${dialog.exitCode}, $permitted")
         }
 
-        PoetryPySdkConfigurationCollector.logPoetryDialog(
-                module.project,
-                permitted,
-                source,
-                if (poetryExecutable.isNullOrBlank()) PoetryPySdkConfigurationCollector.Companion.InputData.NOT_FILLED else PoetryPySdkConfigurationCollector.Companion.InputData.SPECIFIED
-        )
         return if (permitted) envData else null
     }
 
@@ -82,7 +76,6 @@ class PyPoetrySdkConfiguration : PyProjectSdkConfigurationExtension {
             setupPoetry(FileUtil.toSystemDependentName(basePath), null, true, init)
         }
         catch (e: ExecutionException) {
-            PoetryPySdkConfigurationCollector.logPoetry(module.project, PoetryPySdkConfigurationCollector.Companion.PoetryResult.CREATION_FAILURE)
             LOGGER.warn("Exception during creating poetry environment", e)
             showSdkExecutionException(null, e, "Failed To Create Poetry Environment")
             return null
@@ -90,19 +83,15 @@ class PyPoetrySdkConfiguration : PyProjectSdkConfigurationExtension {
 
         val path = PythonSdkUtil.getPythonExecutable(poetry).also {
             if (it == null) {
-                PoetryPySdkConfigurationCollector.logPoetry(module.project, PoetryPySdkConfigurationCollector.Companion.PoetryResult.NO_EXECUTABLE)
                 LOGGER.warn("Python executable is not found: $poetry")
             }
         } ?: return null
 
         val file = LocalFileSystem.getInstance().refreshAndFindFileByPath(path).also {
             if (it == null) {
-                PoetryPySdkConfigurationCollector.logPoetry(module.project, PoetryPySdkConfigurationCollector.Companion.PoetryResult.NO_EXECUTABLE_FILE)
                 LOGGER.warn("Python executable file is not found: $path")
             }
         } ?: return null
-
-        PoetryPySdkConfigurationCollector.logPoetry(module.project, PoetryPySdkConfigurationCollector.Companion.PoetryResult.CREATED)
 
         LOGGER.debug("Setting up associated poetry environment: $path, $basePath")
         val sdk = SdkConfigurationUtil.setupSdk(
