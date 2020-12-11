@@ -186,7 +186,6 @@
         <editorFactoryListener implementation="com.koxudaxi.poetry.PyProjectTomlWatcher"/>
         <projectService serviceImplementation="com.koxudaxi.poetry.PoetryConfigService"/>
         <postStartupActivity implementation="com.koxudaxi.poetry.PoetryConfigLoader" order="last"/>
-        <statistics.counterUsagesCollector implementationClass="com.koxudaxi.poetry.PoetryPySdkConfigurationCollector"/>
     </extensions>
     <extensions defaultExtensionNs="Pythonid">
         <pyAddSdkProvider implementation="com.koxudaxi.poetry.PyAddPoetrySdkProvider"/>
