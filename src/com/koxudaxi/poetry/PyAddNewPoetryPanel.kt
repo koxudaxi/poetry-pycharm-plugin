@@ -19,6 +19,7 @@ import com.intellij.util.PlatformUtils
 import com.intellij.util.text.nullize
 import com.intellij.util.ui.FormBuilder
 import com.jetbrains.python.PyBundle
+import com.jetbrains.python.PySdkBundle
 import com.jetbrains.python.PythonModuleTypeBase
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.sdk.add.PyAddNewEnvPanel
@@ -111,7 +112,7 @@ class PyAddNewPoetryPanel(private val project: Project?,
                 val associatedObject = if (PlatformUtils.isPyCharm()) "project" else "module"
                 addLabeledComponent("Associated $associatedObject", moduleField)
             }
-            addLabeledComponent("Base interpreter:", baseSdkField)
+            addLabeledComponent(PySdkBundle.message("python.venv.base.label"), baseSdkField)
             addComponent(installPackagesCheckBox)
             addLabeledComponent("Poetry executable:", poetryPathField)
         }
