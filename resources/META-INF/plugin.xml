@@ -1,9 +1,15 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin" require-restart="true">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 1.0.1</h2>
+    <p>Bug fixes</p>
+    <ul>
+        <li>Remove configuration collector [#150] by @sproshev </li>
+        <li>Apply changes in python bundles in 2020.3 [#149] by @sproshev </li>
+    </ul>
     <h2>version 1.0.0</h2>
     <p>Features</p>
     <ul>
