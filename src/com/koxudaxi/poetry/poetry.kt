@@ -479,7 +479,7 @@ class PyProjectTomlWatcher : EditorFactoryListener {
                 "#lock" ->
                     runPoetryInBackground(module, listOf("lock"), "Locking $POETRY_LOCK")
                 "#noupdate" ->
-                    runPoetryInBackground(module, listOf("lock", " --no-update"), "Locking $POETRY_LOCK without updating")
+                    runPoetryInBackground(module, listOf("lock", "--no-update"), "Locking $POETRY_LOCK without updating")
                 "#update" ->
                     runPoetryInBackground(module, listOf("update"), "Updating Poetry environment")
             }
