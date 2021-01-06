@@ -139,7 +139,7 @@ fun detectPoetryExecutable(): File? {
  * Returns the configured poetry executable or detects it automatically.
  */
 fun getPoetryExecutable(): File? =
-        PropertiesComponent.getInstance().poetryPath?.let { File(it) } ?: detectPoetryExecutable()
+        PropertiesComponent.getInstance().poetryPath?.let { File(it) }?.takeIf { it.exists() } ?: detectPoetryExecutable()
 
 fun validatePoetryExecutable(poetryExecutable: @SystemDependent String?): ValidationInfo? {
     val message = if (poetryExecutable.isNullOrBlank()) {
@@ -273,7 +273,7 @@ fun runPoetry(sdk: Sdk, vararg args: String): String {
 /**
  * Runs the configured poetry for the specified project path.
  */
-fun runPoetry(projectPath: @SystemDependent String, vararg args: String): String {
+fun runPoetry(projectPath: @SystemDependent String?, vararg args: String): String {
     val executable = getPoetryExecutable()?.path
             ?: throw PyExecutionException("Cannot find Poetry", "poetry", emptyList(), ProcessOutput())
 
@@ -424,6 +424,11 @@ class PoetryInstallQuickFix : LocalQuickFix {
 class PyProjectTomlWatcher : EditorFactoryListener {
     private val changeListenerKey = Key.create<DocumentListener>("PyProjectToml.change.listener")
     private val notificationActive = Key.create<Boolean>("PyProjectToml.notification.active")
+    private val content: String = if (poetryVersion?.let { it < "1.1.1" } == true) {
+        "Run <a href='#lock'>poetry lock</a> or <a href='#update'>poetry update</a>"
+    } else {
+        "Run <a href='#lock'>poetry lock</a>, <a href='#noupdate'>poetry lock --no-update</a> or <a href='#update'>poetry update</a>"
+    }
 
     override fun editorCreated(event: EditorFactoryEvent) {
         val project = event.editor.project
@@ -468,12 +473,13 @@ class PyProjectTomlWatcher : EditorFactoryListener {
             else -> "out of date"
         }
         val title = "$POETRY_LOCK is $what"
-        val content = "Run <a href='#lock'>poetry lock</a> or <a href='#update'>poetry update</a>"
         val notification = LOCK_NOTIFICATION_GROUP.createNotification(title = title, content = content, listener = NotificationListener { notification, event ->
             FileDocumentManager.getInstance().saveAllDocuments()
             when (event.description) {
                 "#lock" ->
                     runPoetryInBackground(module, listOf("lock"), "Locking $POETRY_LOCK")
+                "#noupdate" ->
+                    runPoetryInBackground(module, listOf("lock", "--no-update"), "Locking $POETRY_LOCK without updating")
                 "#update" ->
                     runPoetryInBackground(module, listOf("update"), "Updating Poetry environment")
             }
@@ -649,8 +655,12 @@ fun isVirtualEnvsInProject(projectPath: String): Boolean? =
             it.trim() == "true"
         }
 
+val poetryVersion: String?
+    get() = syncRunPoetry(null, "--version", defaultResult = "") {
+        it.split(' ').lastOrNull()
+    }
 
-inline fun <reified T> syncRunPoetry(projectPath: @SystemDependent String, vararg args: String, defaultResult: T, crossinline callback: (String) -> T): T {
+inline fun <reified T> syncRunPoetry(projectPath: @SystemDependent String?, vararg args: String, defaultResult: T, crossinline callback: (String) -> T): T {
     return try {
         ApplicationManager.getApplication().executeOnPooledThread<T> {
             try {
