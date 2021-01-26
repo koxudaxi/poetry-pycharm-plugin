@@ -168,10 +168,15 @@ class PyAddNewPoetryPanel(private val project: Project?,
                 ?: return ValidationInfo("Poetry executable is not found")
         return when {
             !executable.exists() -> ValidationInfo(PyBundle.message("python.sdk.file.not.found", executable.absolutePath))
-            !Files.isExecutable(executable.toPath()) || !executable.isFile -> ValidationInfo(PyBundle.message("python.sdk.cannot.execute", executable.absolutePath))
+            !Files.isExecutable(executable.toPath()) || !executable.isFile || !testPoetryExecutable(executable) ->
+                ValidationInfo(PyBundle.message("python.sdk.cannot.execute", executable.absolutePath))
             else -> null
         }
     }
+
+    private fun testPoetryExecutable(executable: File): Boolean =
+        syncRunCommand(executable.parent, executable.absolutePath, "--help", defaultResult = false) { true }
+
 
     /**
      * Checks if the poetry for the project hasn't been already added.

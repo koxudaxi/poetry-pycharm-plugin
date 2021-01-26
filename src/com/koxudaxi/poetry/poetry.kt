@@ -660,6 +660,23 @@ val poetryVersion: String?
         it.split(' ').lastOrNull()
     }
 
+inline fun <reified T> syncRunCommand(projectPath: @SystemDependent String, command: String, vararg args: String, defaultResult: T, crossinline callback: (String) -> T): T {
+    return try {
+        ApplicationManager.getApplication().executeOnPooledThread<T> {
+            try {
+                val result = runCommand(projectPath, command, *args)
+                callback(result)
+            } catch (e: PyExecutionException) {
+                defaultResult
+            } catch (e: ProcessNotCreatedException) {
+                defaultResult
+            }
+        }.get(10, TimeUnit.SECONDS)
+    } catch (e: TimeoutException) {
+        defaultResult
+    }
+}
+
 inline fun <reified T> syncRunPoetry(projectPath: @SystemDependent String?, vararg args: String, defaultResult: T, crossinline callback: (String) -> T): T {
     return try {
         ApplicationManager.getApplication().executeOnPooledThread<T> {
