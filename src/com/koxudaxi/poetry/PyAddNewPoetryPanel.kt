@@ -175,7 +175,7 @@ class PyAddNewPoetryPanel(private val project: Project?,
     }
 
     private fun testPoetryExecutable(executable: File): Boolean =
-        syncRunCommand(executable.parent, executable.absolutePath, "--help", defaultResult = false) { true }
+        syncRunCommand(executable.parent, executable.absolutePath, "--version", defaultResult = false) { true }
 
 
     /**
