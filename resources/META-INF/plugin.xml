@@ -1,9 +1,14 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin" require-restart="true">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
+    <h2>version 1.0.4</h2>
+    <p>Bug fixes</p>
+    <ul>
+        <li>Support Toml plugin version 0.2.140.3644-202 [#169]</li>
+    </ul>
     <h2>version 1.0.3</h2>
     <p>Features</p>
     <ul>

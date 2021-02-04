@@ -21,8 +21,8 @@ object PoetryScriptsLineMarkerContributor : RunLineMarkerContributor() {
             return null //Toml plugin is installed. But, PyCharm has not restarted yet.
         }
         val keyValue = element.parent as? TomlKeyValue ?: return null
-        val names = (keyValue.parent as? TomlTable)?.header?.names ?: return null
-        if (names.joinToString(".") { it.text } != "tool.poetry.scripts") return null
+        val key = (keyValue.parent as? TomlTable)?.header?.key ?: return null
+        if (key.text != "tool.poetry.scripts") return null
         if (keyValue.key.text == null) return null
         val value = keyValue.value as? TomlLiteral ?: return null
         if (value.textLength < 3) return null
