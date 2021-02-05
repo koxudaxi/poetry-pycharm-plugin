@@ -62,11 +62,14 @@ import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
+import org.toml.lang.psi.TomlKey
+import org.toml.lang.psi.TomlTableHeader
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.function.Supplier
 import java.util.regex.Pattern
+import kotlin.reflect.full.memberProperties
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
 const val POETRY_LOCK: String = "poetry.lock"
@@ -713,3 +716,26 @@ fun parsePoetryShowOutdated(input: String): Map<String, PoetryOutdatedVersion> {
 data class PoetryOutdatedVersion(
         @SerializedName("currentVersion") var currentVersion: String,
         @SerializedName("latestVersion") var latestVersion: String)
+
+
+private fun tomlTableHeaderHasKey(): Boolean = TomlTableHeader::class.memberProperties.any { it.name == "key" }
+var tomlTableHeaderHasKeyCache: Boolean = tomlTableHeaderHasKey()
+val TomlTableHeader.keyText: String? get() = getKeyByTomlTableHeader(this)
+
+
+private fun getKeyByTomlTableHeader(header: TomlTableHeader): String? {
+    return try {
+        when {
+            tomlTableHeaderHasKeyCache -> header.key?.text
+            else -> (header::class.java.getMethod("getNames").invoke(header) as? List<*>)
+                ?.filterIsInstance<TomlKey>()?.joinToString(".") { it.text }
+        }
+    } catch (e: Exception) {
+        val updatedTomlTableHeaderHasKey = tomlTableHeaderHasKey()
+        if (updatedTomlTableHeaderHasKey == tomlTableHeaderHasKeyCache) {
+            throw Exception("unsupported TomlTableHeader type")
+        }
+        tomlTableHeaderHasKeyCache = updatedTomlTableHeaderHasKey
+        getKeyByTomlTableHeader(header)
+    }
+}
