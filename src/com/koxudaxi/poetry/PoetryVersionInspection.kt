@@ -32,7 +32,7 @@ class PoetryVersionInspection : LocalInspectionTool() {
             if (file.virtualFile != module.pyProjectToml) return
             file.children
                     .filter { element ->
-                        (element as? TomlTable)?.header?.key?.text in listOf("tool.poetry.dependencies", "tool.poetry.dev-dependencies")
+                        (element as? TomlTable)?.header?.keyText in listOf("tool.poetry.dependencies", "tool.poetry.dev-dependencies")
                     }.flatMap {
                         it.children.mapNotNull { line -> line as? TomlKeyValue }
                     }.forEach { keyValue ->

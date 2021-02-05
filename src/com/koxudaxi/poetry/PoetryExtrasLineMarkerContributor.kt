@@ -17,8 +17,8 @@ object PoetryExtrasLineMarkerContributor : RunLineMarkerContributor() {
             return null //Toml plugin is installed. But, PyCharm has not restarted yet.
         }
         val keyValue = element.parent as? TomlKeyValue ?: return null
-        val key = (keyValue.parent as? TomlTable)?.header?.key ?: return null
-        if (key.text != "tool.poetry.extras") return null
+        val header = (keyValue.parent as? TomlTable)?.header ?: return null
+        if (header.keyText != "tool.poetry.extras") return null
         if (keyValue.key.text == null) return null
         val value = keyValue.value as? TomlArray ?: return null
         if (value.elements.isEmpty() || value.elements.any { it !is TomlLiteral || it.textLength < 3}) return null
