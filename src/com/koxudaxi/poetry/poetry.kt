@@ -674,7 +674,7 @@ inline fun <reified T> syncRunCommand(projectPath: @SystemDependent String, comm
             } catch (e: ProcessNotCreatedException) {
                 defaultResult
             }
-        }.get(10, TimeUnit.SECONDS)
+        }.get(30, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
         defaultResult
     }
@@ -691,7 +691,7 @@ inline fun <reified T> syncRunPoetry(projectPath: @SystemDependent String?, vara
             } catch (e: ProcessNotCreatedException) {
                 defaultResult
             }
-        }.get(10, TimeUnit.SECONDS)
+        }.get(30, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
         defaultResult
     }
