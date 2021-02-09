@@ -1,10 +1,15 @@
 <idea-plugin url="https://github.com/koxudaxi/poetry-pycharm-plugin" require-restart="true">
     <id>com.koxudaxi.poetry</id>
     <name>Poetry</name>
-    <version>1.0.6</version>
+    <version>1.0.8</version>
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
     <change-notes><![CDATA[
-    <h2>version 1.0.6</h2>
+    <h2>version 1.0.8</h2>
+    <p>Features</p>
+    <ul>
+        <li>Support PyCharm EAP 211.* [#181]</li>
+    </ul>
+    <h2>version 1.0.7</h2>
     <p>Bug fixes</p>
     <ul>
         <li>Change command timeout to 30 sec [#177]</li>
