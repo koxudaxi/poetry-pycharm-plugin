@@ -12,6 +12,11 @@
     <h2>version 1.0.7</h2>
     <p>Bug fixes</p>
     <ul>
+        <li>Fix replaced Python restricted dependencies [#184]</li>
+    </ul>
+    <h2>version 1.0.6</h2>
+    <p>Bug fixes</p>
+    <ul>
         <li>Change command timeout to 30 sec [#177]</li>
         <li>Fix broken dependency on Toml plugin [#176]</li>
     </ul>
