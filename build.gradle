@@ -18,7 +18,7 @@ plugins {
 
 intellij {
     pluginName project.name
-    version "2020.3.3"
+    version "211.5538.22-EAP-SNAPSHOT"
     type "PC"
     updateSinceUntilBuild false
     downloadSources true
@@ -26,8 +26,8 @@ intellij {
 }
 
 patchPluginXml {
-    sinceBuild "203.7148"
-    untilBuild "203.*"
+    sinceBuild "211.5538.22"
+    untilBuild "211.*"
 }
 
 allprojects {

@@ -7,7 +7,6 @@ import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.projectRoots.SdkAdditionalData
 import com.intellij.openapi.util.UserDataHolder
 import com.jetbrains.python.packaging.ui.PyPackageManagementService
-import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.sdk.PyInterpreterInspectionQuickFixData
 import com.jetbrains.python.sdk.PySdkProvider
 import com.jetbrains.python.sdk.PythonSdkUtil
@@ -16,13 +15,6 @@ import org.jdom.Element
 import javax.swing.Icon
 
 class PoetrySdkProvider : PySdkProvider {
-    override val configureSdkProgressText: String
-        get() = "Looking for a pyproject.toml"
-
-    override fun configureSdk(project: Project, module: Module, existingSdks: List<Sdk>): Sdk? {
-        return detectAndSetupPoetry(project, module, existingSdks)
-    }
-
     override fun createEnvironmentAssociationFix(module: Module, sdk: Sdk, isPyCharm: Boolean, associatedModulePath: String?): PyInterpreterInspectionQuickFixData? {
         if (sdk.isPoetry) {
             val message = when {
@@ -43,13 +35,6 @@ class PoetrySdkProvider : PySdkProvider {
     override fun createInstallPackagesQuickFix(module: Module): LocalQuickFix? {
         val sdk = PythonSdkUtil.findPythonSdk(module) ?: return null
         return if (sdk.isPoetry) PoetryInstallQuickFix() else null
-    }
-
-    override fun createMissingSdkFix(module: Module, file: PyFile): PyInterpreterInspectionQuickFixData? {
-        return when {
-            UsePoetryQuickFix.isApplicable(module) -> PyInterpreterInspectionQuickFixData(UsePoetryQuickFix(null, module), "No Python interpreter configured for the project")
-            else -> null
-        }
     }
 
     override fun createNewEnvironmentPanel(project: Project?, module: Module?, existingSdks: List<Sdk>, newProjectPath: String?, context: UserDataHolder): PyAddNewEnvPanel {

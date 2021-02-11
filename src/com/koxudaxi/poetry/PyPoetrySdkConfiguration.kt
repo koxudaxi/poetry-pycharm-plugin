@@ -1,5 +1,6 @@
 package com.koxudaxi.poetry
 
+import com.intellij.codeInspection.util.IntentionName
 import com.jetbrains.python.sdk.configuration.PyProjectSdkConfigurationExtension
 import com.intellij.execution.ExecutionException
 import com.intellij.ide.util.PropertiesComponent
@@ -28,13 +29,10 @@ class PyPoetrySdkConfiguration : PyProjectSdkConfigurationExtension {
 
     private val LOGGER = Logger.getInstance(PyPoetrySdkConfiguration::class.java)
 
-    override fun isApplicable(module: Module): Boolean = module.pyProjectToml != null
-
     override fun createAndAddSdkForConfigurator(module: Module): Sdk? = createAndAddSDk(module, false)
 
-    override fun getIntentionName(module: Module): String {
-        return "Create a poetry environment using ${module.pyProjectToml?.name}"
-    }
+    override fun getIntention(module: Module): @IntentionName String? =
+        module.pyProjectToml?.let { "Create a poetry environment using ${it.name}" }
 
     override fun createAndAddSdkForInspection(module: Module): Sdk? = createAndAddSDk(module, true)
 
