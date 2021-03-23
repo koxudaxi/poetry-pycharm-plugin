@@ -7,7 +7,7 @@
     <h2>version 1.1.1</h2>
     <p>Bug fixes</p>
     <ul>
-        <li>Remove checking poetry executable [#202]</li>
+        <li>Remove checking poetry executable [#203]</li>
     </ul>
     <h2>version 1.1.0</h2>
     <p>Features</p>
