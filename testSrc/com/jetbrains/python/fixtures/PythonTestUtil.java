@@ -15,8 +15,6 @@
  */
 package com.jetbrains.python.fixtures;
 
-import com.jetbrains.python.PythonHelpersLocator;
-
 /**
  * @author yole
  */
@@ -25,6 +23,6 @@ public class PythonTestUtil {
     }
 
     public static String getTestDataPath() {
-        return PythonHelpersLocator.getPythonCommunityPath() + "/testData";
+        return System.getProperty("user.dir") + "/testData";
     }
 }
