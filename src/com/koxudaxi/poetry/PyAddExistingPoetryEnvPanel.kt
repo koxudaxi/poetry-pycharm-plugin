@@ -55,7 +55,7 @@ class PyAddExistingPoetryEnvPanel(private val project: Project?,
                 .panel
         add(formPanel, BorderLayout.NORTH)
         addInterpretersAsync(sdkComboBox) {
-            detectPoetryEnvs(module, existingSdks, context, project?.basePath ?: newProjectPath)
+            detectPoetryEnvs(module, existingSdks, project?.basePath ?: newProjectPath)
                     .filterNot { it.isAssociatedWithAnotherModule(module) }
         }
     }
