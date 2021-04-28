@@ -174,8 +174,8 @@ class PyAddNewPoetryPanel(private val project: Project?,
         }
     }
 
-    private val isPoetry by lazy { existingSdks.filter { it.isPoetry }.map { it.associatedModulePath to it }.toMap() }
-    private val homePath by lazy { existingSdks.map { it.homePath to it }.toMap() }
+    private val isPoetry by lazy { existingSdks.filter { it.isPoetry }.associateBy { it.associatedModulePath } }
+    private val homePath by lazy { existingSdks.associateBy { it.homePath } }
     private val pythonExecutable = ConcurrentHashMap<String, String>()
     private val venvInProject = ConcurrentHashMap<String, Boolean?>()
 
