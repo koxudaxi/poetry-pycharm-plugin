@@ -30,6 +30,7 @@ import java.awt.Dimension
 import java.awt.event.ItemEvent
 import java.io.File
 import java.nio.file.Files
+import java.util.concurrent.ConcurrentHashMap
 import javax.swing.Icon
 import javax.swing.JComboBox
 import javax.swing.event.DocumentEvent
@@ -89,7 +90,7 @@ class PyAddNewPoetryPanel(private val project: Project?,
 
         val modules = project?.let {
             ModuleUtil.getModulesOfType(it, PythonModuleTypeBase.getInstance())
-        } ?: emptyList()
+        }?.sortedBy { it.name } ?: emptyList()
 
         moduleField = JComboBox(modules.toTypedArray()).apply {
             renderer = ModuleListCellRenderer()
@@ -173,20 +174,31 @@ class PyAddNewPoetryPanel(private val project: Project?,
         }
     }
 
+    private val isPoetry by lazy { existingSdks.filter { it.isPoetry }.associateBy { it.associatedModulePath } }
+    private val homePath by lazy { existingSdks.associateBy { it.homePath } }
+    private val pythonExecutable = ConcurrentHashMap<String, String>()
+    private val venvInProject = ConcurrentHashMap<String, Boolean?>()
+
+    private fun computePythonExecutable(homePath: String): String? {
+        return pythonExecutable.getOrPut(homePath) { getPythonExecutable(homePath) }
+    }
+
+    private fun isVenvInProject(path: String): Boolean? {
+        return venvInProject.getOrPut(path) { isVirtualEnvsInProject(path) }
+    }
+
     /**
      * Checks if the poetry for the project hasn't been already added.
      */
     private fun validatePoetryIsNotAdded(): ValidationInfo? {
         val path = projectPath ?: return null
         val project = project ?: return null
-        val addedPoetry = existingSdks.find {
-            it.associatedModulePath == path && it.isPoetry
-        } ?: return null
+        val addedPoetry = isPoetry[path] ?: return null
         if (addedPoetry.homeDirectory == null) return null
         // TODO: check existing envs
-        if (isVirtualEnvsInProject(path) == false) return null
-        val inProjectEnvExecutable = inProjectEnvPath?.let {getPythonExecutable(it)} ?: return null
-        val inProjectEnv =  existingSdks.find { it.homePath == inProjectEnvExecutable } ?: return null
+        if (isVenvInProject(path) == false) return null
+        val inProjectEnvExecutable = inProjectEnvPath?.let {computePythonExecutable(it)} ?: return null
+        val inProjectEnv = homePath[inProjectEnvExecutable] ?: return null
         return ValidationInfo("Poetry interpreter has been already added, select '${inProjectEnv.name}'")
     }
 
