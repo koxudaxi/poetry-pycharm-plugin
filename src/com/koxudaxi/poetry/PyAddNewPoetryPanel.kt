@@ -88,9 +88,7 @@ class PyAddNewPoetryPanel(private val project: Project?,
     init {
         layout = BorderLayout()
 
-        val modules = project?.let {
-            ModuleUtil.getModulesOfType(it, PythonModuleTypeBase.getInstance())
-        }?.sortedBy { it.name } ?: emptyList()
+        val modules = allModules(project)
 
         moduleField = JComboBox(modules.toTypedArray()).apply {
             renderer = ModuleListCellRenderer()

@@ -29,7 +29,9 @@ import com.jetbrains.python.sdk.add.PyAddSdkView
 import com.jetbrains.python.sdk.add.PySdkPathChoosingComboBox
 import com.jetbrains.python.sdk.add.addInterpretersAsync
 import java.awt.BorderLayout
+import java.util.concurrent.ConcurrentHashMap
 import javax.swing.Icon
+import kotlin.streams.toList
 
 /**
  * @author vlan
@@ -44,6 +46,7 @@ class PyAddExistingPoetryEnvPanel(private val project: Project?,
                                   private val existingSdks: List<Sdk>,
                                   override var newProjectPath: String?,
                                   context: UserDataHolder) : PyAddSdkPanel() {
+    private var sdkToModule = ConcurrentHashMap<String, Module>()
     override val panelName: String get() = PyBundle.message("python.add.sdk.panel.name.existing.environment")
     override val icon: Icon = POETRY_ICON
     private val sdkComboBox = PySdkPathChoosingComboBox()
@@ -55,8 +58,18 @@ class PyAddExistingPoetryEnvPanel(private val project: Project?,
                 .panel
         add(formPanel, BorderLayout.NORTH)
         addInterpretersAsync(sdkComboBox) {
-            detectPoetryEnvs(module, existingSdks, context, project?.basePath ?: newProjectPath)
+            val existingSdkPaths = sdkHomes(existingSdks)
+            val moduleSdks = allModules(project).parallelStream().flatMap { module ->
+                val sdks = detectPoetryEnvs(module, existingSdkPaths, module.basePath)
+                        .filterNot { it.isAssociatedWithAnotherModule(module) }
+                sdks.forEach { sdkToModule.putIfAbsent(it.name, module) }
+                sdks.stream()
+            }.toList()
+            val rootSdks = detectPoetryEnvs(module, existingSdkPaths, project?.basePath ?: newProjectPath)
                     .filterNot { it.isAssociatedWithAnotherModule(module) }
+            val moduleSdkPaths = moduleSdks.map { it.name }.toSet()
+            val sdks = rootSdks.filterNot { moduleSdkPaths.contains(it.name) } + moduleSdks
+            sdks.sortedBy { it.name }
         }
     }
 
@@ -64,11 +77,13 @@ class PyAddExistingPoetryEnvPanel(private val project: Project?,
 
     override fun getOrCreateSdk(): Sdk? {
         return when (val sdk = sdkComboBox.selectedSdk) {
-            is PyDetectedSdk ->
-                setupPoetrySdkUnderProgress(project, module, existingSdks, newProjectPath,
+            is PyDetectedSdk -> {
+                val mappedModule = sdkToModule[sdk.name] ?: module
+                setupPoetrySdkUnderProgress(project, mappedModule, existingSdks, newProjectPath,
                         getPythonExecutable(sdk.name), false, sdk.name)?.apply {
                     PySdkSettings.instance.preferredVirtualEnvBaseSdk = getPythonExecutable(sdk.name)
                 }
+            }
             else -> sdk
         }
     }
