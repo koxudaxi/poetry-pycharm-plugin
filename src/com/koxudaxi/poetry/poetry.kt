@@ -49,6 +49,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.util.PathUtil
 import com.intellij.util.PlatformUtils
+import com.jetbrains.python.PythonModuleTypeBase
 import com.jetbrains.python.inspections.PyPackageRequirementsInspection
 import com.jetbrains.python.packaging.*
 import com.jetbrains.python.sdk.*
@@ -639,6 +640,12 @@ fun createPoetryPanel(project: Project?,
             POETRY_ICON, panels, defaultPanel)
 }
 
+
+fun allModules(project: Project?): List<Module> {
+    return project?.let {
+        ModuleUtil.getModulesOfType(it, PythonModuleTypeBase.getInstance())
+    }?.sortedBy { it.name } ?: emptyList()
+}
 
 fun sdkHomes(sdks: List<Sdk>): Set<String> = sdks.mapNotNull { it.homePath }.toSet()
 
