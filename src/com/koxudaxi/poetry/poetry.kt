@@ -60,6 +60,8 @@ import org.apache.tuweni.toml.Toml
 import org.apache.tuweni.toml.TomlInvalidTypeException
 import org.apache.tuweni.toml.TomlParseResult
 import org.apache.tuweni.toml.TomlTable
+import org.jetbrains.annotations.NonNls
+import org.jetbrains.annotations.Nullable
 import org.jetbrains.annotations.SystemDependent
 import org.jetbrains.annotations.TestOnly
 import org.toml.lang.psi.TomlKey
@@ -626,9 +628,10 @@ fun createPoetryPanel(project: Project?,
     }
     val existingPoetryPanel = PyAddExistingPoetryEnvPanel(project, module, existingSdks, null, context)
     val panels = listOfNotNull(newPoetryPanel, existingPoetryPanel)
+    val existingSdkPaths = sdkHomes(existingSdks)
     val defaultPanel = when {
-        detectPoetryEnvs(module, existingSdks, project?.basePath
-                ?: newProjectPath).any { it.isAssociatedWithModule(module) } -> existingPoetryPanel
+     detectPoetryEnvs(module, existingSdkPaths, project?.basePath
+             ?: newProjectPath).any { it.isAssociatedWithModule(module) } -> existingPoetryPanel
         newPoetryPanel != null -> newPoetryPanel
         else -> existingPoetryPanel
     }
@@ -637,9 +640,10 @@ fun createPoetryPanel(project: Project?,
 }
 
 
-fun detectPoetryEnvs(module: Module?, existingSdks: List<Sdk>, projectPath: String?): List<PyDetectedSdk> {
+fun sdkHomes(sdks: List<Sdk>): Set<String> = sdks.mapNotNull { it.homePath }.toSet()
+
+fun detectPoetryEnvs(module: Module?, existingSdkPaths: Set<String>, projectPath: String?): List<PyDetectedSdk> {
     val path = module?.basePath ?: projectPath ?: return emptyList()
-    val existingSdkPaths = existingSdks.mapNotNull { it.homePath }.toSet()
     return try {
         getPoetryEnvs(path).filterNot { existingSdkPaths.contains(getPythonExecutable(it)) }.map { PyDetectedSdk(it) }
     } catch (e: Throwable) {

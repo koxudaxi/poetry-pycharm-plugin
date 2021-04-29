@@ -16,6 +16,7 @@
 package com.koxudaxi.poetry
 
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.ui.ValidationInfo
@@ -23,6 +24,7 @@ import com.intellij.openapi.util.UserDataHolder
 import com.intellij.util.ui.FormBuilder
 import com.jetbrains.python.PyBundle
 import com.jetbrains.python.PySdkBundle
+import com.jetbrains.python.PythonModuleTypeBase
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.sdk.add.PyAddSdkPanel
 import com.jetbrains.python.sdk.add.PyAddSdkView
@@ -55,7 +57,8 @@ class PyAddExistingPoetryEnvPanel(private val project: Project?,
                 .panel
         add(formPanel, BorderLayout.NORTH)
         addInterpretersAsync(sdkComboBox) {
-            detectPoetryEnvs(module, existingSdks, project?.basePath ?: newProjectPath)
+            val existingSdkPaths = sdkHomes(existingSdks)
+            detectPoetryEnvs(module, existingSdkPaths, project?.basePath ?: newProjectPath)
                     .filterNot { it.isAssociatedWithAnotherModule(module) }
         }
     }
