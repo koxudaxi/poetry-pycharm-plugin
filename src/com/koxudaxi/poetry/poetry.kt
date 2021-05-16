@@ -601,9 +601,7 @@ fun runPoetryInBackground(module: Module, args: List<String>, description: Strin
                 runPoetry(sdk, *args.toTypedArray())
             } catch (e: RunCanceledByUserException) {
             } catch (e: ExecutionException) {
-                runInEdt {
-                    Messages.showErrorDialog(project, e.toString(), CommonBundle.message("title.error"))
-                }
+                showSdkExecutionException(sdk, e, "Error Running Poetry")
             } finally {
                 PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
                 sdk.associatedModuleDir?.refresh(true, false)
