@@ -18,10 +18,6 @@ repo_name: koxudaxi/poetry-pycharm-plugin
 repo_url: https://github.com/koxudaxi/poetry-pycharm-plugin
 site_url: https://koxudaxi.github.io/poetry-pycharm-plugin
 
-google_analytics:
-    - 'UA-142130505-1'
-    - 'auto'
-
 nav:
     - Overview: index.md
     - Install: install.md
