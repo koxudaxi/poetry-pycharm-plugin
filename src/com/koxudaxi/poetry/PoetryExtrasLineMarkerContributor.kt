@@ -18,7 +18,7 @@ object PoetryExtrasLineMarkerContributor : RunLineMarkerContributor() {
         }
         val keyValue = element.parent as? TomlKeyValue ?: return null
         val header = (keyValue.parent as? TomlTable)?.header ?: return null
-        if (header.keyText != "tool.poetry.extras") return null
+        if (header.key?.text != "tool.poetry.extras") return null
         if (keyValue.key.text == null) return null
         val value = keyValue.value as? TomlArray ?: return null
         if (value.elements.isEmpty() || value.elements.any { it !is TomlLiteral || it.textLength < 3}) return null

@@ -22,7 +22,7 @@ object PoetryScriptsLineMarkerContributor : RunLineMarkerContributor() {
         }
         val keyValue = element.parent as? TomlKeyValue ?: return null
         val header = (keyValue.parent as? TomlTable)?.header ?: return null
-        if (header.keyText != "tool.poetry.scripts") return null
+        if (header.key?.text != "tool.poetry.scripts") return null
         if (keyValue.key.text == null) return null
         val value = keyValue.value as? TomlLiteral ?: return null
         if (value.textLength < 3) return null

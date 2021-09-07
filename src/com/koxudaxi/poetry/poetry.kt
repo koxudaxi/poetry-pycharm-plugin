@@ -726,29 +726,3 @@ data class PoetryOutdatedVersion(
         @SerializedName("currentVersion") var currentVersion: String,
         @SerializedName("latestVersion") var latestVersion: String)
 
-
-private fun tomlTableHeaderHasKey(): Boolean = TomlTableHeader::class.memberProperties.any { it.name == "key" }
-var tomlTableHeaderHasKeyCache: Boolean? = null
-val TomlTableHeader.keyText: String? get() = getKeyByTomlTableHeader(this)
-
-
-private fun getKeyByTomlTableHeader(header: TomlTableHeader): String? {
-    return try {
-        when (tomlTableHeaderHasKeyCache) {
-            true -> header.key?.text
-            false -> (header::class.java.getMethod("getNames").invoke(header) as? List<*>)
-                ?.filterIsInstance<TomlKey>()?.joinToString(".") { it.text }
-            else -> {
-                tomlTableHeaderHasKeyCache = tomlTableHeaderHasKey()
-                getKeyByTomlTableHeader(header)
-            }
-        }
-    } catch (e: Exception) {
-        val updatedTomlTableHeaderHasKey = tomlTableHeaderHasKey()
-        if (updatedTomlTableHeaderHasKey == tomlTableHeaderHasKeyCache) {
-            throw Exception("unsupported TomlTableHeader type")
-        }
-        tomlTableHeaderHasKeyCache = updatedTomlTableHeaderHasKey
-        getKeyByTomlTableHeader(header)
-    }
-}
