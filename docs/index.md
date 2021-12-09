@@ -6,6 +6,17 @@
 
 [A JetBrains PyCharm plugin](https://plugins.jetbrains.com/plugin/14307-poetry) for [`poetry`](https://python-poetry.org/).
 
+# This plugin has been merged into PyCharm source code.
+PyCharm 2021.3 or later provide poetry integration as a built-in feature.
+
+If you have any questions then please crate an issue on [JetBrains youtrack](https://youtrack.jetbrains.com/issues)
+
+JetBrains maintains the poetry feature in PyCharm.
+
+## Sponsors
+[![JetBrains](https://avatars.githubusercontent.com/u/60931315?s=200&v=4)](https://github.com/JetBrainsOfficial)
+
+
 ## Demo
 ![poetry_demo1](https://raw.githubusercontent.com/koxudaxi/poetry-pycharm-plugin/master/docs/poetry_demo1.gif)
 
