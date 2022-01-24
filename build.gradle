@@ -1,7 +1,7 @@
 buildscript {
     ext.kotlin_version = "1.5.30"
     ext.toml_version = "0.2.154.4085-212"
-    ext.tuweni_toml_version = "2.0.0"
+    ext.tuweni_toml_version = "2.1.0"
     ext.jvm_version = "11"
     ext.language_version = "1.3"
     repositories {
